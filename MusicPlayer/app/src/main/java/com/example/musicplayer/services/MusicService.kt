@@ -4,17 +4,13 @@ import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.IBinder
+import android.util.Log
+import com.example.musicplayer.MainActivity
 import com.example.musicplayer.R
 
 
 class MusicService : Service() {
-    companion object {
-        open val PLAY_MUSIC = 0x001
-        open val PAUSE_MUSIC = 0x002
-        open val STOP_MUSIC = 0x003
-        open val NEXT_MUSIC = 0x004
-        open val PRE_MUSIC = 0x005
-    }
+
 
     var mp: MediaPlayer? = null
     lateinit var musicList: MutableList<Int>
@@ -25,6 +21,9 @@ class MusicService : Service() {
     }
 
     override fun onCreate() {
+        Log.e("TAG", "onCreate: ----------------on create----------------", )
+        musicList = mutableListOf()
+
         val fields = R.raw::class.java.declaredFields
         for (i in fields) musicList.add(i.getInt(R.raw::class.java))
 
@@ -44,14 +43,16 @@ class MusicService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent != null) {
-            val data = intent.extras
+            val extras = intent.extras
+            val data = extras?.getBundle("data")
             if (data != null) {
+                Log.e("TAG", "onStartCommand: --------------------start command----------------------", )
                 when (data.getInt("doWhat")) {
-                    PLAY_MUSIC -> playMusic()
-                    PAUSE_MUSIC -> pauseMusic()
-                    STOP_MUSIC -> stopMusic()
-                    NEXT_MUSIC -> nextMusic()
-                    PRE_MUSIC -> preMUsic()
+                    MainActivity.PLAY_MUSIC -> playMusic()
+                    MainActivity.PAUSE_MUSIC -> pauseMusic()
+                    MainActivity.STOP_MUSIC -> stopMusic()
+                    MainActivity.NEXT_MUSIC -> nextMusic()
+                    MainActivity.PRE_MUSIC -> preMUsic()
                 }
             }
         }
@@ -60,6 +61,7 @@ class MusicService : Service() {
 
     fun playMusic() {
         if (mp == null) return
+        Log.e("TAG", "playMusic: playMusic ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", )
         if (!mp!!.isPlaying) {
             mp!!.start()
         }

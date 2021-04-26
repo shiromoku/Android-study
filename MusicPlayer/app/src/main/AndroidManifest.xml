@@ -11,8 +11,7 @@
         android:theme="@style/Theme.MusicPlayer">
         <service
             android:name=".services.MusicService"
-            android:enabled="true"
-            android:exported="false">
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.example.musicplayer.musicservice"/>
             </intent-filter>
