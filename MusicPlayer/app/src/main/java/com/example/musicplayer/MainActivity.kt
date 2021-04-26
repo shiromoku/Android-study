@@ -1,56 +1,93 @@
 package com.example.musicplayer
 
-import android.content.BroadcastReceiver
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.Button
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.musicplayer.broadcastReceiver.MusicServiceBroadcastReceiver
 
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        open val PLAY_MUSIC = 0x001
-        open val PAUSE_MUSIC = 0x002
-        open val STOP_MUSIC = 0x003
-        open val NEXT_MUSIC = 0x004
-        open val PRE_MUSIC = 0x005
+        val PLAY_MUSIC = 0x001
+        val PAUSE_MUSIC = 0x002
+        val STOP_MUSIC = 0x003
+        val NEXT_MUSIC = 0x004
+        val PRE_MUSIC = 0x005
+        val START_SERVICE = 0x006
     }
 
-    lateinit var musicServiceReceiver: BroadcastReceiver
+//    lateinit var musicServiceReceiver: BroadcastReceiver
+    lateinit var tvMusicInfo:TextView
+    lateinit var sbLocation:SeekBar
+    lateinit var tvTime:TextView
+    lateinit var btnPreMusic:Button
+    lateinit var btnPlayOrPause:Button
+    lateinit var btnNextMusic:Button
+    lateinit var btnStopMusic:Button
+
     val myIntent = Intent("com.example.musicplayer.musicservice")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initPart()
+        setListener()
+
+
+    }
+
+    private fun setListener() {
+        btnPlayOrPause.setOnClickListener {
+            val broadcastInten = Intent()
+            broadcastInten.action = "com.example.musicplayer.musicbroadcast"
+            broadcastInten.putExtra("data",Bundle().apply {
+                putInt("doWhat", PLAY_MUSIC)
+            })
+            sendBroadcast(broadcastInten)
+        }
+        btnStopMusic.setOnClickListener {
+            val broadcastInten = Intent()
+            broadcastInten.action = "com.example.musicplayer.musicbroadcast"
+            broadcastInten.putExtra("data",Bundle().apply {
+                putInt("doWhat", STOP_MUSIC)
+            })
+            sendBroadcast(broadcastInten)
+        }
+    }
+
+    private fun initPart() {
+        tvMusicInfo = findViewById(R.id.tv_music_info)
+        sbLocation = findViewById(R.id.sb_location)
+        tvTime = findViewById(R.id.tv_time)
+        btnPreMusic = findViewById(R.id.btn_pre_music)
+        btnPlayOrPause = findViewById(R.id.btn_play_or_pause)
+        btnNextMusic = findViewById(R.id.btn_next_music)
+        btnStopMusic = findViewById(R.id.btn_stop_music)
+
+
         myIntent.setPackage(this.packageName)
         myIntent.putExtra("data", Bundle().apply {
-            putInt("doWhat", PLAY_MUSIC)
+            putInt("doWhat", START_SERVICE)
         })
-
-
-
-        val test = findViewById<Button>(R.id.test)
-        test.setOnClickListener {
-            startService(myIntent)
-        }
+        startService(myIntent)
     }
 
     override fun onResume() {
         super.onResume()
-        //注册广播接收器
-        val intentFilter = IntentFilter()
-        intentFilter.addAction("com.example.musicplayer.musicbroadcast")
-        musicServiceReceiver = MusicServiceBroadcastReceiver(this.packageName)
-        //下面这一句：NetworkChangeReceiver 就会收到所有值为android.net.conn.CONNECTIVITY_CHANGE 的广播
-        registerReceiver(musicServiceReceiver, intentFilter)
+//        //注册广播接收器
+//        val intentFilter = IntentFilter()
+//        intentFilter.addAction("com.example.musicplayer.musicbroadcast")
+//        musicServiceReceiver = MusicServiceBroadcastReceiver(this.packageName)
+//        //下面这一句：NetworkChangeReceiver 就会收到所有值为android.net.conn.CONNECTIVITY_CHANGE 的广播
+//        registerReceiver(musicServiceReceiver, intentFilter)
     }
 
     override fun onPause() {
         super.onPause()
         //注销广播接收器
-        unregisterReceiver(musicServiceReceiver)
+//        unregisterReceiver(musicServiceReceiver)
         stopService(myIntent)
     }
 }

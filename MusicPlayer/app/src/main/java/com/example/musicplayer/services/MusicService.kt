@@ -1,16 +1,20 @@
 package com.example.musicplayer.services
 
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.MediaPlayer
 import android.os.IBinder
 import android.util.Log
 import com.example.musicplayer.MainActivity
 import com.example.musicplayer.R
+import com.example.musicplayer.broadcastReceiver.MusicServiceBroadcastReceiver
 
 
 class MusicService : Service() {
 
+    lateinit var musicServiceReceiver: BroadcastReceiver
 
     var mp: MediaPlayer? = null
     lateinit var musicList: MutableList<Int>
@@ -31,6 +35,13 @@ class MusicService : Service() {
             mp = MediaPlayer.create(this, musicList[nowPlay])
             mp?.isLooping = false
         }
+
+
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.example.musicplayer.musicbroadcast")
+        musicServiceReceiver = MusicServiceBroadcastReceiver(this.packageName)
+        //下面这一句：NetworkChangeReceiver 就会收到所有值为android.net.conn.CONNECTIVITY_CHANGE 的广播
+        registerReceiver(musicServiceReceiver, intentFilter)
         //注册
     }
 
@@ -39,6 +50,7 @@ class MusicService : Service() {
         mp?.stop()
         mp?.release()
         //取消注册
+        unregisterReceiver(musicServiceReceiver)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -48,6 +60,9 @@ class MusicService : Service() {
             if (data != null) {
                 Log.e("TAG", "onStartCommand: --------------------start command----------------------", )
                 when (data.getInt("doWhat")) {
+                    MainActivity.START_SERVICE -> {
+                        Log.e("TAG", "onStartCommand: ---------------------service start--------------------", )
+                    }
                     MainActivity.PLAY_MUSIC -> playMusic()
                     MainActivity.PAUSE_MUSIC -> pauseMusic()
                     MainActivity.STOP_MUSIC -> stopMusic()
@@ -76,9 +91,10 @@ class MusicService : Service() {
 
     fun stopMusic() {
         if (mp == null) return
+        Log.e("TAG", "stopMusic: ----------STOP MUSIC-----------------", )
         mp!!.stop()
         mp!!.seekTo(0)
-        mp!!.prepare()
+//        mp!!.prepare()
     }
 
     fun nextMusic() {
