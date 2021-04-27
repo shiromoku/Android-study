@@ -11,6 +11,7 @@ import android.util.Log
 import com.example.musicplayer.MainActivity
 import com.example.musicplayer.R
 import com.example.musicplayer.broadcastReceiver.MusicServiceBroadcastReceiver
+import java.util.*
 
 
 class MusicService : Service() {
@@ -19,6 +20,7 @@ class MusicService : Service() {
 
     var mp: MediaPlayer? = null
     lateinit var musicList: MutableList<Int>
+    var timer:Timer? = Timer()
     var nowPlay = 0
 
     override fun onBind(intent: Intent): IBinder? {
@@ -33,15 +35,22 @@ class MusicService : Service() {
 
         if (mp == null) {
             mp = MediaPlayer.create(this, musicList[nowPlay])
+            setMediaOptation()
             mp?.isLooping = false
         }
 
-
-        //注册
+        //注册接收广播
         val intentFilter = IntentFilter()
         intentFilter.addAction("com.example.musicplayer.musicbroadcast")
         musicServiceReceiver = MusicServiceBroadcastReceiver(this.packageName)
         registerReceiver(musicServiceReceiver, intentFilter)
+
+        //定时更新UI
+//        timer.schedule(object : TimerTask() {
+//            override fun run() {
+//                updateMainUI(mp?.isPlaying ?: false)
+//            }
+//        }, Date(), 500)
     }
 
     override fun onDestroy() {
@@ -50,6 +59,8 @@ class MusicService : Service() {
         mp?.release()
         //取消注册
         unregisterReceiver(musicServiceReceiver)
+
+        timer?.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -59,16 +70,18 @@ class MusicService : Service() {
             if (data != null) {
                 when (data.getInt("doWhat")) {
                     MainActivity.START_SERVICE -> {
-                        var musicName = resources.getResourceName(musicList[nowPlay])
-                        musicName = musicName.substring(musicName.lastIndexOf('/') + 1)
-                        sendMainBroadcast(MainActivity.UPDATE_UI, musicName, "0:05", "0:00", false)
-
+                        updateMainUI(false)
                     }
                     MainActivity.PLAY_MUSIC -> playMusic()
                     MainActivity.PAUSE_MUSIC -> pauseMusic()
-                    MainActivity.STOP_MUSIC -> stopMusic()
                     MainActivity.NEXT_MUSIC -> nextMusic()
                     MainActivity.PRE_MUSIC -> preMUsic()
+                    MainActivity.SEEK_MUSIC -> seekMusic(data.getInt("seekTo"))
+                    MainActivity.STOP_TIMER ->{
+                        timer?.cancel()
+                        timer?.purge()
+                        timer = null
+                    }
                 }
             }
         }
@@ -78,6 +91,7 @@ class MusicService : Service() {
     fun playMusic() {
         if (mp == null) {
             mp = MediaPlayer.create(this, musicList[nowPlay])
+            setMediaOptation()
             mp?.isLooping = false
         }
         if (!mp!!.isPlaying) {
@@ -86,6 +100,12 @@ class MusicService : Service() {
 
         updateMainUI(mp!!.isPlaying)
 
+        if(timer == null)timer = Timer()
+        timer!!.schedule(object : TimerTask() {
+            override fun run() {
+                updateMainUI(mp?.isPlaying ?: false)
+            }
+        }, Date(), 500)
     }
 
     fun pauseMusic() {
@@ -94,15 +114,10 @@ class MusicService : Service() {
             mp!!.pause()
         }
         updateMainUI(mp!!.isPlaying)
-    }
 
-    fun stopMusic() {
-        if (mp == null) return
-        mp!!.stop()
-//        mp!!.seekTo(0)
-        mp = null
-        updateMainUI(false)
-//        mp!!.prepare()
+        timer?.cancel()
+        timer?.purge()
+        timer = null
     }
 
     fun nextMusic() {
@@ -111,8 +126,7 @@ class MusicService : Service() {
         nowPlay++
         nowPlay %= musicList.size
         mp = MediaPlayer.create(this, musicList[nowPlay])
-        var musicName = resources.getResourceName(musicList[nowPlay])
-        musicName = musicName.substring(musicName.lastIndexOf('/') + 1)
+        setMediaOptation()
         if (oldMp != null && mp != null) {
             if (oldMp.isPlaying) {
                 oldMp.stop()
@@ -128,15 +142,25 @@ class MusicService : Service() {
 
     fun preMUsic() {
         if (mp == null) return
+        val isPlayingCache = mp!!.isPlaying
         if (mp!!.currentPosition < 2000) {
             nowPlay--;
             if (nowPlay < 0) nowPlay = musicList.size - 1
             mp!!.release()
             mp = MediaPlayer.create(this, musicList[nowPlay])
+            setMediaOptation()
         } else {
             mp!!.seekTo(0)
         }
+        if(isPlayingCache)mp!!.start()
         updateMainUI(mp!!.isPlaying)
+    }
+
+    fun seekMusic(seekTo: Int){
+//        if(mp?.isPlaying == true){
+//            mp?.pause()
+//        }
+        mp?.seekTo(seekTo)
     }
 
     private fun updateMainUI(isPlaying: Boolean) {
@@ -167,8 +191,8 @@ class MusicService : Service() {
     ) {
         val broadcastInten = Intent()
         broadcastInten.action = "com.example.musicplayer.mainbroadcast"
-        val totalTimeInt = mp?.duration?.div(1000)?:0
-        val nowTimeInt = mp?.currentPosition?.div(1000)?:0
+        val totalTimeInt = mp?.duration?:0
+        val nowTimeInt = mp?.currentPosition?:0
         broadcastInten.putExtra("data", Bundle().apply {
             putInt("doWhat", doWhat)
             putString("musicName", musicName)
@@ -179,5 +203,15 @@ class MusicService : Service() {
             putInt("nowTimeInt",nowTimeInt)
         })
         sendBroadcast(broadcastInten)
+    }
+
+    fun setMediaOptation(){
+        mp?.setOnCompletionListener {
+            nextMusic()
+            playMusic()
+        }
+        mp?.setOnSeekCompleteListener {
+            updateMainUI(mp!!.isPlaying)
+        }
     }
 }

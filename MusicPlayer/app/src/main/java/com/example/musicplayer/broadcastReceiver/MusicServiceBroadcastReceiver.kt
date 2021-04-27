@@ -15,13 +15,15 @@ class MusicServiceBroadcastReceiver(val packageName: String?) : BroadcastReceive
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        Log.e("TAG", "onReceive: -------------------receive------------------", )
         val toData = Bundle()
         val fromData = intent?.extras?.getBundle("data")
         if(fromData != null){
             toData.putInt("doWhat",fromData.getInt("doWhat"))
+            fromData.getInt("seekTo").let {
+                toData.putInt("seekTo", it)
+            }
         }
-        newIntent.putExtra("data",toData)
+        newIntent.putExtra("data",fromData)
         context.startService(newIntent)
     }
 }

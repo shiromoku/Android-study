@@ -16,11 +16,12 @@ class MainActivity : AppCompatActivity() {
     companion object {
         val PLAY_MUSIC = 0x001
         val PAUSE_MUSIC = 0x002
-        val STOP_MUSIC = 0x003
         val NEXT_MUSIC = 0x004
         val PRE_MUSIC = 0x005
         val START_SERVICE = 0x006
         val UPDATE_UI = 0x007
+        val SEEK_MUSIC = 0x008
+        val STOP_TIMER = 0x009
     }
 
     lateinit var mainBroadcastReceiver: BroadcastReceiver
@@ -30,9 +31,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var btnPreMusic:Button
     lateinit var btnPlayOrPause:Button
     lateinit var btnNextMusic:Button
-    lateinit var btnStopMusic:Button
 
     val myIntent = Intent("com.example.musicplayer.musicservice")
+    var isPlaying: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,12 +45,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setListener() {
-        btnPlayOrPause.setOnClickListener {
+        btnPreMusic.setOnClickListener {
             val broadcastInten = Intent()
             broadcastInten.action = "com.example.musicplayer.musicbroadcast"
             broadcastInten.putExtra("data",Bundle().apply {
-                putInt("doWhat", PLAY_MUSIC)
+                putInt("doWhat", PRE_MUSIC)
             })
+            sendBroadcast(broadcastInten)
+        }
+        btnPlayOrPause.setOnClickListener {
+            val broadcastInten = Intent()
+            broadcastInten.action = "com.example.musicplayer.musicbroadcast"
+            if(isPlaying){
+                broadcastInten.putExtra("data",Bundle().apply {
+                    putInt("doWhat", PAUSE_MUSIC)
+                })
+            }else{
+                broadcastInten.putExtra("data",Bundle().apply {
+                    putInt("doWhat", PLAY_MUSIC)
+                })
+            }
             sendBroadcast(broadcastInten)
         }
         btnNextMusic.setOnClickListener {
@@ -60,14 +75,25 @@ class MainActivity : AppCompatActivity() {
             })
             sendBroadcast(broadcastInten)
         }
-        btnStopMusic.setOnClickListener {
-            val broadcastInten = Intent()
-            broadcastInten.action = "com.example.musicplayer.musicbroadcast"
-            broadcastInten.putExtra("data",Bundle().apply {
-                putInt("doWhat", STOP_MUSIC)
-            })
-            sendBroadcast(broadcastInten)
-        }
+
+        sbLocation.setOnSeekBarChangeListener(object :SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if(fromUser){
+//                    sendServicesBroadcast(PLAY_MUSIC,null)
+                    sendServicesBroadcast(SEEK_MUSIC,progress)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+//                sendServicesBroadcast(PAUSE_MUSIC,null)
+//                sendServicesBroadcast(PAUSE_MUSIC,null)
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+//                sendServicesBroadcast(SEEK_MUSIC,sbLocation.progress)
+//                sendServicesBroadcast(PLAY_MUSIC,null)
+            }
+        })
     }
 
     private fun initPart() {
@@ -77,7 +103,6 @@ class MainActivity : AppCompatActivity() {
         btnPreMusic = findViewById(R.id.btn_pre_music)
         btnPlayOrPause = findViewById(R.id.btn_play_or_pause)
         btnNextMusic = findViewById(R.id.btn_next_music)
-        btnStopMusic = findViewById(R.id.btn_stop_music)
 
 
         myIntent.setPackage(this.packageName)
@@ -113,15 +138,17 @@ class MainActivity : AppCompatActivity() {
                         val musicName = data.getString("musicName") ?: "N/A"
                         val totalTime = data.getString("totalTime") ?: "N/A"
                         val nowTime = data.getString("nowTime") ?: "N/A"
-                        val isPlaying = data.getBoolean("isPlaying")
-                        updateUI(musicName,totalTime,nowTime,isPlaying)
+                        isPlaying = data.getBoolean("isPlaying")
+                        val  totalTimeInt = data.getInt("totalTimeInt")
+                        val nowTimeInt = data.getInt("nowTimeInt")
+                        updateUI(musicName,totalTime,nowTime,totalTimeInt,nowTimeInt)
                     }
                 }
             }
         }
     }
 
-    fun updateUI(musicName: String, totalTime: String, nowTime: String, isPlaying: Boolean) {
+    fun updateUI(musicName: String, totalTime: String, nowTime: String,totalTimeInt:Int,nowTimeInt: Int) {
         tvMusicInfo.text = musicName
         val timeText = "$nowTime/$totalTime"
         tvTime.text = timeText
@@ -130,5 +157,17 @@ class MainActivity : AppCompatActivity() {
         }else{
             btnPlayOrPause.text = "播放"
         }
+        sbLocation.progress = nowTimeInt
+        sbLocation.max = totalTimeInt
+    }
+
+    fun sendServicesBroadcast(doWhat: Int,seekTo :Int?){
+        val broadcastInten = Intent()
+        broadcastInten.action = "com.example.musicplayer.musicbroadcast"
+        broadcastInten.putExtra("data",Bundle().apply {
+            putInt("doWhat", doWhat)
+            seekTo?.let { putInt("seekTo", it) }
+        })
+        sendBroadcast(broadcastInten)
     }
 }
