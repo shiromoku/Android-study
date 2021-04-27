@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.MediaPlayer
+import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import com.example.musicplayer.MainActivity
@@ -25,7 +26,6 @@ class MusicService : Service() {
     }
 
     override fun onCreate() {
-        Log.e("TAG", "onCreate: ----------------on create----------------", )
         musicList = mutableListOf()
 
         val fields = R.raw::class.java.declaredFields
@@ -37,12 +37,11 @@ class MusicService : Service() {
         }
 
 
+        //注册
         val intentFilter = IntentFilter()
         intentFilter.addAction("com.example.musicplayer.musicbroadcast")
         musicServiceReceiver = MusicServiceBroadcastReceiver(this.packageName)
-        //下面这一句：NetworkChangeReceiver 就会收到所有值为android.net.conn.CONNECTIVITY_CHANGE 的广播
         registerReceiver(musicServiceReceiver, intentFilter)
-        //注册
     }
 
     override fun onDestroy() {
@@ -58,10 +57,12 @@ class MusicService : Service() {
             val extras = intent.extras
             val data = extras?.getBundle("data")
             if (data != null) {
-                Log.e("TAG", "onStartCommand: --------------------start command----------------------", )
                 when (data.getInt("doWhat")) {
                     MainActivity.START_SERVICE -> {
-                        Log.e("TAG", "onStartCommand: ---------------------service start--------------------", )
+                        var musicName = resources.getResourceName(musicList[nowPlay])
+                        musicName = musicName.substring(musicName.lastIndexOf('/') + 1)
+                        sendMainBroadcast(MainActivity.UPDATE_UI, musicName, "0:05", "0:00", false)
+
                     }
                     MainActivity.PLAY_MUSIC -> playMusic()
                     MainActivity.PAUSE_MUSIC -> pauseMusic()
@@ -75,11 +76,16 @@ class MusicService : Service() {
     }
 
     fun playMusic() {
-        if (mp == null) return
-        Log.e("TAG", "playMusic: playMusic ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", )
+        if (mp == null) {
+            mp = MediaPlayer.create(this, musicList[nowPlay])
+            mp?.isLooping = false
+        }
         if (!mp!!.isPlaying) {
             mp!!.start()
         }
+
+        updateMainUI(mp!!.isPlaying)
+
     }
 
     fun pauseMusic() {
@@ -87,22 +93,37 @@ class MusicService : Service() {
         if (mp!!.isPlaying) {
             mp!!.pause()
         }
+        updateMainUI(mp!!.isPlaying)
     }
 
     fun stopMusic() {
         if (mp == null) return
-        Log.e("TAG", "stopMusic: ----------STOP MUSIC-----------------", )
         mp!!.stop()
-        mp!!.seekTo(0)
+//        mp!!.seekTo(0)
+        mp = null
+        updateMainUI(false)
 //        mp!!.prepare()
     }
 
     fun nextMusic() {
         if (mp == null) return
-        mp!!.release()
+        val oldMp = mp;
         nowPlay++
         nowPlay %= musicList.size
         mp = MediaPlayer.create(this, musicList[nowPlay])
+        var musicName = resources.getResourceName(musicList[nowPlay])
+        musicName = musicName.substring(musicName.lastIndexOf('/') + 1)
+        if (oldMp != null && mp != null) {
+            if (oldMp.isPlaying) {
+                oldMp.stop()
+                oldMp.release()
+                mp!!.start()
+                updateMainUI(mp!!.isPlaying)
+
+            } else {
+                updateMainUI(mp!!.isPlaying)
+            }
+        }
     }
 
     fun preMUsic() {
@@ -115,5 +136,48 @@ class MusicService : Service() {
         } else {
             mp!!.seekTo(0)
         }
+        updateMainUI(mp!!.isPlaying)
+    }
+
+    private fun updateMainUI(isPlaying: Boolean) {
+        var musicName = resources.getResourceName(musicList[nowPlay])
+        musicName = musicName.substring(musicName.lastIndexOf('/') + 1)
+        val totalTimeInt = mp?.duration?.div(1000)
+        val totalTimeMin = totalTimeInt?.div(60)
+        val totalTimeSec = totalTimeInt?.rem(60)
+        val nowTimeInt = mp?.currentPosition?.div(1000)
+        val nowTimeMin = nowTimeInt?.div(60)
+        val nowTimeSec = nowTimeInt?.rem(60)
+
+        sendMainBroadcast(
+            MainActivity.UPDATE_UI,
+            musicName,
+            "$totalTimeMin:$totalTimeSec",
+            "$nowTimeMin:$nowTimeSec",
+            isPlaying
+        )
+    }
+
+    fun sendMainBroadcast(
+        doWhat: Int,
+        musicName: String,
+        totalTime: String,
+        nowTime: String,
+        isPlaying: Boolean
+    ) {
+        val broadcastInten = Intent()
+        broadcastInten.action = "com.example.musicplayer.mainbroadcast"
+        val totalTimeInt = mp?.duration?.div(1000)?:0
+        val nowTimeInt = mp?.currentPosition?.div(1000)?:0
+        broadcastInten.putExtra("data", Bundle().apply {
+            putInt("doWhat", doWhat)
+            putString("musicName", musicName)
+            putString("totalTime", totalTime)
+            putString("nowTime", nowTime)
+            putBoolean("isPlaying", isPlaying)
+            putInt("totalTimeInt",totalTimeInt)
+            putInt("nowTimeInt",nowTimeInt)
+        })
+        sendBroadcast(broadcastInten)
     }
 }
