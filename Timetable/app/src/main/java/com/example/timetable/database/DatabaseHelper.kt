@@ -1,4 +1,4 @@
-package com.shiromoku.timetable.database
+package com.example.timetable.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -10,15 +10,16 @@ open class DatabaseHelper(context: Context, databaseName:String, version: Int) :
         var sql = "create table if not EXISTS course(" +
                 "courseId text not null  primary key ," +
                 "courseName text ," +
-                "courseTeacher text ," +
-                "courseLocation text" +
+                "courseTeacher text " +
                 ")"
         db!!.execSQL(sql)
 
-        sql =  "create table if not EXISTS courseTime(" +
+        sql =  "create table if not EXISTS dayCourse(" +
+                "day text not null," +
                 "courseId text not null," +
-                "courseTimeFrom text ," +
-                "courseTimeTo text " +
+                "classFrom int," +
+                "classTo int," +
+                "roomLocation text" +
                 ")"
         db.execSQL(sql)
 

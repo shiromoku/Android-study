@@ -1,8 +1,9 @@
 package com.example.timetable
 
+import android.util.Log
+import com.example.timetable.entity.Course
+import com.example.timetable.entity.DayCourse
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +13,46 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+//        assertEquals(4, 2 + 2)
+        val c = Course("12","23",null)
+        val ck = c::class.java
+        val values = ck.declaredFields
+
+
+        for(i in values){
+            i.isAccessible = true
+            val x = i.get(c)
+            var str = "---------${i.name}----${i.type}----$x--------"
+            i.set(c,"555")
+            println(str)
+        }
+        print("\n\n\n")
+        for(i in values){
+            i.isAccessible = true
+            val x = i.get(c)
+            var str = "---------${i.name}--------$x--------"
+//            i.set(c,"555")
+            println(str)
+        }
+    }
+
+    @Test
+    fun test(){
+//        val dc = DayCourse("1","1",3,4,"1")
+        val c = Course("12","23",null)
+        val ck = c::class.java
+        for(i in ck.declaredFields) {
+            println("----${i.name}---${i.annotations.size}")
+            i.annotations.forEach {
+
+                if(it is PrimaryKey) {
+                    println("${i.name}--yes")
+                }
+                else {
+                    println("${i.name}--no")
+                }
+            }
+
+        }
     }
 }

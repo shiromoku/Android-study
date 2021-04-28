@@ -1,25 +1,44 @@
-package com.shiromoku.timetable.database
+package com.example.timetable.database
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+//import com.blankj.utilcode.util.ConvertUtils
 import com.shiromoku.timetable.tools.DatabaseTools
 
 // TODO: 2021/4/20 check and update code
-class Database(context: Context, val tableName: String) {
+class Database(context: Context, private val tableName: String) {
     companion object {
-        const val databaseName = "goods"
+        const val databaseName = "timeTable"
         const val version = 1
     }
 
     private val databaseHelper = DatabaseHelper(context, databaseName, version)
 
-    fun insert(values: ContentValues): Int {
+
+    fun insert(insertObject: Any): Int {
+        val jClass = insertObject::class.java
+        val values = jClass.declaredFields
+        val insertValues = ContentValues()
+        for (i in values) {
+            i.isAccessible = true
+            when (val v = i.get(insertObject)) {
+                is Boolean -> insertValues.put(i.name, v)
+                is Byte -> insertValues.put(i.name, v)
+                is ByteArray -> insertValues.put(i.name, v)
+                is Double -> insertValues.put(i.name, v)
+                is Float -> insertValues.put(i.name, v)
+                is Int -> insertValues.put(i.name, v)
+                is Long -> insertValues.put(i.name, v)
+                is Short -> insertValues.put(i.name, v)
+                is String -> insertValues.put(i.name, v)
+            }
+        }
         val writer = databaseHelper.writableDatabase
         writer.beginTransaction()
         var flag = 0
         flag = try {
-            writer.insertOrThrow(tableName, null, values)
+            writer.insertOrThrow(tableName, null, insertValues)
             writer.setTransactionSuccessful()
             1
         } catch (e: SQLiteConstraintException) {
@@ -30,39 +49,56 @@ class Database(context: Context, val tableName: String) {
         }
         return flag
     }
+//    fun insert(values: ContentValues): Int {
+//        val writer = databaseHelper.writableDatabase
+//        writer.beginTransaction()
+//        var flag = 0
+//        flag = try {
+//            writer.insertOrThrow(tableName, null, values)
+//            writer.setTransactionSuccessful()
+//            1
+//        } catch (e: SQLiteConstraintException) {
+//            -1
+//        } finally {
+//            writer.endTransaction()
+//            writer.close()
+//        }
+//        return flag
+//    }
+//
+//
+//    fun insert(values: Array<ContentValues>): Int {
+//        val writer = databaseHelper.writableDatabase
+//        writer.beginTransaction()
+//        var flag = 0
+//        flag = try {
+//            for (value in values) {
+//                writer.insertOrThrow(tableName, null, value)
+//            }
+//            writer.setTransactionSuccessful()
+//            1
+//        } catch (e: java.lang.Exception) {
+//            -1
+//        } finally {
+//            writer.endTransaction()
+//            writer.close()
+//        }
+//        return flag
+//    }
 
-
-    fun insert(values: Array<ContentValues>): Int {
+    fun delete(deleteOjbect: Any): Int {
         val writer = databaseHelper.writableDatabase
-        writer.beginTransaction()
-        var flag = 0
-        flag = try {
-            for (value in values) {
-                writer.insertOrThrow(tableName, null, value)
-            }
-            writer.setTransactionSuccessful()
-            1
-        } catch (e: java.lang.Exception) {
-            -1
-        } finally {
-            writer.endTransaction()
-            writer.close()
-        }
-        return flag
-    }
-
-
-    //    fun delete(where:ContentValues){
-    fun delete(where: MutableMap<String, Any>): Int {
-        val writer = databaseHelper.writableDatabase
-        var columns = emptyArray<String>()
+        var columnsName = emptyArray<String>()
         var values = emptyArray<String>()
-        for (i in where.keys) {
-            columns += i
-            values += where[i].toString()
+        val deleteValues = deleteOjbect::class.java.declaredFields
+        for (i in deleteValues) {
+            i.isAccessible = true
+            if (i.get(deleteOjbect) != null) {
+                columnsName += i.name
+                values += i.get(deleteOjbect).toString()
+            }
         }
-
-        val sql = DatabaseTools.generateSQLWith(columns, " and ")
+        val sql = DatabaseTools.generateSQLWith(columnsName, " and ")
 
         writer.beginTransaction()
         var flag = 0
@@ -78,44 +114,127 @@ class Database(context: Context, val tableName: String) {
         }
         return flag
     }
+    //    fun delete(where:ContentValues){
+//    fun delete(where: MutableMap<String, Any>): Int {
+//        val writer = databaseHelper.writableDatabase
+//        var columns = emptyArray<String>()
+//        var values = emptyArray<String>()
+//        for (i in where.keys) {
+//            columns += i
+//            values += where[i].toString()
+//        }
+//
+//        val sql = DatabaseTools.generateSQLWith(columns, " and ")
+//
+//        writer.beginTransaction()
+//        var flag = 0
+//        flag = try {
+//            writer.delete(tableName, sql, values)
+//            writer.setTransactionSuccessful()
+//            1
+//        } catch (e: Exception) {
+//            -1
+//        } finally {
+//            writer.endTransaction()
+//            writer.close()
+//        }
+//        return flag
+//    }
 
-
-    fun find(
-        columns: Array<String>?,
-        whereColumns: Array<String>?,
-        values: Array<String>?
-    ): Array<ContentValues> {
-        var returnResult = emptyArray<ContentValues>()
+    fun find(findOjbect: Any): MutableList<Any> {
         val reader = databaseHelper.readableDatabase
-        var sql: String? = ""
-        sql = if (whereColumns != null) {
-            DatabaseTools.generateSQLWith(whereColumns, " and ")
-        } else {
-            null
-        }
+        val result = mutableListOf<Any>()                   //需要返回的结果
+        var columnsName = emptyArray<String>()              //拥有的列名
+        var findColumnsName = emptyArray<String>()          //作为查找条件的列名
+        var values = emptyArray<String>()                   //查找条件的值
 
-        val cursor = reader.query(tableName, columns, sql, values, null, null, null, null)
-        if (cursor.count == 0) {
-            return returnResult
-        }
-        cursor.moveToFirst()
-
-        do {
-            val map = ContentValues()
-
-            for (i in cursor.columnNames) {
-                map.put(i,cursor.getString(cursor.getColumnIndex(i)))
-//                map[i] = cursor.getString(cursor.getColumnIndex(i))
+        //反射 查询数据及返回数据
+        val findValues = findOjbect::class.java.declaredFields
+        for (i in findValues) {
+            i.isAccessible = true
+            columnsName += i.name
+            if (i.get(findOjbect) != null) {
+                findColumnsName += i.name
+                values += i.get(findOjbect).toString()
             }
-            returnResult += map
+        }
+        val sql = DatabaseTools.generateSQLWith(findColumnsName, " and ")
 
-        } while (cursor.moveToNext())
-        cursor.close()
-        reader.close()
-        return returnResult
+        //执行查询
+        val cursor = reader.query(tableName, columnsName, sql, values, null, null, null, null)
+        if (cursor.count != 0) {
+            cursor.moveToFirst()
+            do {
+                //遍历构建返回结果
+                val singalObject = findOjbect::class.java.newInstance()
+                for (i in singalObject::class.java.declaredFields) {
+                    i.isAccessible = true
+                    //获取数据库记录值
+                    //警告: 如果实体类字段有误将会抛出异常
+                    val resultValue = when (i.type) {
+                        Byte::class.java ->
+                            cursor.getBlob(cursor.getColumnIndexOrThrow(i.name))
+                        ByteArray::class.java ->
+                            cursor.getBlob(cursor.getColumnIndexOrThrow(i.name))
+                        Double::class.java ->
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(i.name))
+                        Float::class.java ->
+                            cursor.getFloat(cursor.getColumnIndexOrThrow(i.name))
+                        Int::class.java, Integer::class.java ->
+                            cursor.getInt(cursor.getColumnIndexOrThrow(i.name))
+                        Long::class.java ->
+                            cursor.getLong(cursor.getColumnIndexOrThrow(i.name))
+                        Short::class.java ->
+                            cursor.getShort(cursor.getColumnIndexOrThrow(i.name))
+                        String::class.java ->
+                            cursor.getString(cursor.getColumnIndexOrThrow(i.name))
+                        else -> ""
+                    }
+                    i.set(singalObject, resultValue)
+                }
+                //添加至结果
+                result.add(singalObject)
+            } while (cursor.moveToNext())
+        }
+        return result
     }
+//    fun find(
+//        columns: Array<String>?,
+//        whereColumns: Array<String>?,
+//        values: Array<String>?
+//    ): Array<ContentValues> {
+//        var returnResult = emptyArray<ContentValues>()
+//        val reader = databaseHelper.readableDatabase
+//        var sql: String? = ""
+//        sql = if (whereColumns != null) {
+//            DatabaseTools.generateSQLWith(whereColumns, " and ")
+//        } else {
+//            null
+//        }
+//
+//        val cursor = reader.query(tableName, columns, sql, values, null, null, null, null)
+//        if (cursor.count == 0) {
+//            return returnResult
+//        }
+//        cursor.moveToFirst()
+//
+//        do {
+//            val map = ContentValues()
+//
+//            for (i in cursor.columnNames) {
+//                map.put(i, cursor.getString(cursor.getColumnIndex(i)))
+////                map[i] = cursor.getString(cursor.getColumnIndex(i))
+//            }
+//            returnResult += map
+//
+//        } while (cursor.moveToNext())
+//        cursor.close()
+//        reader.close()
+//        return returnResult
+//    }
 
 
+    // TODO: 2021/4/28 rewrite  
     fun update(data: ContentValues, where: ContentValues): Int {
         val writer = databaseHelper.writableDatabase
 
@@ -148,26 +267,26 @@ class Database(context: Context, val tableName: String) {
     }
 
 
-    fun save(data: ContentValues, primaryKey: Array<String>?): Int {
-        var primaryKeyValue = emptyArray<String>()
-
-        val where = ContentValues()
-        if (primaryKey != null) {
-            for (i in data.keySet()) {
-                if (i in primaryKey) {
-                    primaryKeyValue += data.getAsString(i)
-                    where.put(i, data.getAsString(i))
-                }
-            }
-            val existData = find(null, primaryKey, primaryKeyValue)
-            if (existData.isEmpty()) {
-                return insert(data)
-            } else {
-                return update(data, where)
-            }
-        }else{
-            return insert(data)
-        }
-    }
+//    fun save(data: ContentValues, primaryKey: Array<String>?): Int {
+//        var primaryKeyValue = emptyArray<String>()
+//
+//        val where = ContentValues()
+//        if (primaryKey != null) {
+//            for (i in data.keySet()) {
+//                if (i in primaryKey) {
+//                    primaryKeyValue += data.getAsString(i)
+//                    where.put(i, data.getAsString(i))
+//                }
+//            }
+//            val existData = find(null, primaryKey, primaryKeyValue)
+//            if (existData.isEmpty()) {
+//                return insert(data)
+//            } else {
+//                return update(data, where)
+//            }
+//        } else {
+//            return insert(data)
+//        }
+//    }
 
 }
