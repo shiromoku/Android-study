@@ -49,12 +49,32 @@ class Database(context: Context, private val tableName: String) {
         }
         return flag
     }
-//    fun insert(values: ContentValues): Int {
+
+    // TODO: 2021/4/29 有空记得补一下这个 
+    // TODO: 2021/4/29 我先把主功能实现吧,要用到再写:p
+    fun insert(insertObjectList: MutableList<Any>): Int {
+//        val jClass = insertObject::class.java
+//        val values = jClass.declaredFields
+//        val insertValues = ContentValues()
+//        for (i in values) {
+//            i.isAccessible = true
+//            when (val v = i.get(insertObject)) {
+//                is Boolean -> insertValues.put(i.name, v)
+//                is Byte -> insertValues.put(i.name, v)
+//                is ByteArray -> insertValues.put(i.name, v)
+//                is Double -> insertValues.put(i.name, v)
+//                is Float -> insertValues.put(i.name, v)
+//                is Int -> insertValues.put(i.name, v)
+//                is Long -> insertValues.put(i.name, v)
+//                is Short -> insertValues.put(i.name, v)
+//                is String -> insertValues.put(i.name, v)
+//            }
+//        }
 //        val writer = databaseHelper.writableDatabase
 //        writer.beginTransaction()
-//        var flag = 0
+        var flag = 0
 //        flag = try {
-//            writer.insertOrThrow(tableName, null, values)
+//            writer.insertOrThrow(tableName, null, insertValues)
 //            writer.setTransactionSuccessful()
 //            1
 //        } catch (e: SQLiteConstraintException) {
@@ -63,28 +83,8 @@ class Database(context: Context, private val tableName: String) {
 //            writer.endTransaction()
 //            writer.close()
 //        }
-//        return flag
-//    }
-//
-//
-//    fun insert(values: Array<ContentValues>): Int {
-//        val writer = databaseHelper.writableDatabase
-//        writer.beginTransaction()
-//        var flag = 0
-//        flag = try {
-//            for (value in values) {
-//                writer.insertOrThrow(tableName, null, value)
-//            }
-//            writer.setTransactionSuccessful()
-//            1
-//        } catch (e: java.lang.Exception) {
-//            -1
-//        } finally {
-//            writer.endTransaction()
-//            writer.close()
-//        }
-//        return flag
-//    }
+        return flag
+    }
 
     fun delete(deleteOjbect: Any): Int {
         val writer = databaseHelper.writableDatabase
@@ -114,32 +114,6 @@ class Database(context: Context, private val tableName: String) {
         }
         return flag
     }
-    //    fun delete(where:ContentValues){
-//    fun delete(where: MutableMap<String, Any>): Int {
-//        val writer = databaseHelper.writableDatabase
-//        var columns = emptyArray<String>()
-//        var values = emptyArray<String>()
-//        for (i in where.keys) {
-//            columns += i
-//            values += where[i].toString()
-//        }
-//
-//        val sql = DatabaseTools.generateSQLWith(columns, " and ")
-//
-//        writer.beginTransaction()
-//        var flag = 0
-//        flag = try {
-//            writer.delete(tableName, sql, values)
-//            writer.setTransactionSuccessful()
-//            1
-//        } catch (e: Exception) {
-//            -1
-//        } finally {
-//            writer.endTransaction()
-//            writer.close()
-//        }
-//        return flag
-//    }
 
     fun find(findOjbect: Any): MutableList<Any> {
         val reader = databaseHelper.readableDatabase
@@ -148,7 +122,7 @@ class Database(context: Context, private val tableName: String) {
         var findColumnsName = emptyArray<String>()          //作为查找条件的列名
         var values = emptyArray<String>()                   //查找条件的值
 
-        //反射 查询数据及返回数据
+        //反射获取查询数据及返回数据
         val findValues = findOjbect::class.java.declaredFields
         for (i in findValues) {
             i.isAccessible = true
@@ -198,43 +172,10 @@ class Database(context: Context, private val tableName: String) {
         }
         return result
     }
-//    fun find(
-//        columns: Array<String>?,
-//        whereColumns: Array<String>?,
-//        values: Array<String>?
-//    ): Array<ContentValues> {
-//        var returnResult = emptyArray<ContentValues>()
-//        val reader = databaseHelper.readableDatabase
-//        var sql: String? = ""
-//        sql = if (whereColumns != null) {
-//            DatabaseTools.generateSQLWith(whereColumns, " and ")
-//        } else {
-//            null
-//        }
-//
-//        val cursor = reader.query(tableName, columns, sql, values, null, null, null, null)
-//        if (cursor.count == 0) {
-//            return returnResult
-//        }
-//        cursor.moveToFirst()
-//
-//        do {
-//            val map = ContentValues()
-//
-//            for (i in cursor.columnNames) {
-//                map.put(i, cursor.getString(cursor.getColumnIndex(i)))
-////                map[i] = cursor.getString(cursor.getColumnIndex(i))
-//            }
-//            returnResult += map
-//
-//        } while (cursor.moveToNext())
-//        cursor.close()
-//        reader.close()
-//        return returnResult
-//    }
 
 
-    // TODO: 2021/4/28 rewrite  
+    // TODO: 2021/4/28 重写此方法
+    //可能会推迟到需要用到的那天再重写23333
     fun update(data: ContentValues, where: ContentValues): Int {
         val writer = databaseHelper.writableDatabase
 
@@ -266,7 +207,7 @@ class Database(context: Context, private val tableName: String) {
         return flag
     }
 
-
+    // TODO: 2021/4/29 重写完update后记得来重写这个 :p
 //    fun save(data: ContentValues, primaryKey: Array<String>?): Int {
 //        var primaryKeyValue = emptyArray<String>()
 //

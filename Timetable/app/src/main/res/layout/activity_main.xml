@@ -8,147 +8,151 @@
     tools:context=".MainActivity">
 
     <RelativeLayout
-        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:paddingLeft="5dp"
-        android:paddingTop="5dp"
-        android:paddingRight="5dp"
-        android:paddingBottom="5dp"
+        android:layout_height="match_parent">
 
-        >
-
-        <TextView
-            android:id="@+id/tv_title"
+        <RelativeLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="你的课表.jpg"
-            android:textColor="@color/sky_blue"
-            android:textSize="30sp" />
+            android:layout_alignParentTop="true"
+            android:paddingLeft="5dp"
+            android:paddingTop="5dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="5dp"
 
-        <ImageView
-            android:id="@+id/iv_add"
-            android:layout_width="30dp"
+            >
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="你的课表.jpg"
+                android:textColor="@color/sky_blue"
+                android:textSize="30sp" />
+
+            <ImageView
+                android:id="@+id/iv_add"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_toStartOf="@id/iv_setting"
+                android:layout_toLeftOf="@id/iv_setting"
+                android:src="@drawable/add" />
+
+            <ImageView
+                android:id="@+id/iv_setting"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/setting" />
+
+        </RelativeLayout>
+
+
+        <!--    <LinearLayout-->
+        <!--    android:layout_width="match_parent"-->
+        <!--    android:layout_height="wrap_content"-->
+        <!--    android:orientation="vertical">-->
+
+        <!--    &lt;!&ndash;工具条&ndash;&gt;-->
+        <!--<android.support.v7.widget.Toolbar-->
+        <!--    android:id="@+id/toolbar"-->
+        <!--    android:layout_width="match_parent"-->
+        <!--    android:layout_height="?attr/actionBarSize"-->
+        <!--    android:background="#7fab96c5"-->
+        <!--    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
+        <!--    app:popupTheme="@style/AlertDialog.AppCompat.Light"/>-->
+        <!--周-->
+        <LinearLayout
+            android:id="@+id/ll_hit_bar"
+            android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_toStartOf="@id/iv_setting"
-            android:layout_toLeftOf="@id/iv_setting"
-            android:src="@drawable/add" />
+            android:layout_below="@id/top_bar"
+            android:background="#7fab96c5"
 
-        <ImageView
-            android:id="@+id/iv_setting"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/setting" />
+            >
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_class_week"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="节/周" />
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周一" />
 
-    <!--    <LinearLayout-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="wrap_content"-->
-    <!--    android:orientation="vertical">-->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周二" />
 
-    <!--    &lt;!&ndash;工具条&ndash;&gt;-->
-    <!--<android.support.v7.widget.Toolbar-->
-    <!--    android:id="@+id/toolbar"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="?attr/actionBarSize"-->
-    <!--    android:background="#7fab96c5"-->
-    <!--    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
-    <!--    app:popupTheme="@style/AlertDialog.AppCompat.Light"/>-->
-    <!--周-->
-    <LinearLayout
-        android:id="@+id/ll_hit_bar"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_below="@id/top_bar"
-        android:background="#7fab96c5"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周三" />
 
-        >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周四" />
 
-        <TextView
-            android:id="@+id/tv_class_week"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="节/周" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周五" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周一" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周六" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周二" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="周日" />
+        </LinearLayout>
+        <!--课程表-->
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周三" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周四" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周五" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周六" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="周日" />
-    </LinearLayout>
-    <!--课程表-->
-
-<!--    <ScrollView-->
-<!--        android:id="@+id/sv_class"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_below="@id/ll_hit_bar"-->
-<!--        >-->
+        <!--    <ScrollView-->
+        <!--        android:id="@+id/sv_class"-->
+        <!--        android:layout_alignParentBottom="true"-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="match_parent"-->
+        <!--        android:layout_below="@id/ll_hit_bar"-->
+        <!--        >-->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/ll_hit_bar"
-            android:paddingBottom="30dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="30dp">
 
             <LinearLayout
                 android:id="@+id/ll_class_number"
@@ -215,5 +219,14 @@
                 android:layout_weight="1"
                 android:orientation="vertical" />
         </LinearLayout>
-<!--    </ScrollView>-->
+        <!--    </ScrollView>-->
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rl_add_crouse"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        >
+
+    </RelativeLayout>
 </RelativeLayout>

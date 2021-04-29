@@ -5,10 +5,10 @@ import org.json.JSONObject
 class DayCourse() {
     var day = ""
     var courseId = ""
-    var classFrom:Int? = null
-    var classTo:Int? = null
+    var classFrom:Int = 0
+    var classTo:Int = 0
     var roomLocation:String? = null
-    constructor(d:String,cId:String,cFrom:Int?,cTo:Int?,rlocation:String?):this(){
+    constructor(d:String,cId:String,cFrom:Int,cTo:Int,rlocation:String?):this(){
         day = d
         courseId = cId
         classFrom = cFrom

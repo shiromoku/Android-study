@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.timetable.entity.Course
 import com.example.timetable.entity.DayCourse
 import org.junit.Test
+import kotlin.math.log
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -54,5 +55,21 @@ class ExampleUnitTest {
             }
 
         }
+    }
+
+    @Test
+    fun colorTest(){
+        val color = 0xFFFF0000.toInt()
+        println(color)
+    }
+
+    private fun randomColor():Int{
+        var result = 0xFF
+        result += (0x55..0xCC).random()
+        result *= 100
+        result += (0x55..0xCC).random()
+        result *= 100
+        result += (0x55..0xCC).random()
+        return result.toInt()
     }
 }
