@@ -2,17 +2,16 @@ package com.example.timetable
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.cardview.widget.CardView
 import com.example.timetable.database.Database
 import com.example.timetable.entity.Course
-import com.example.timetable.entity.CourseInfo
 import com.example.timetable.entity.DayCourse
+import com.example.timetable.entity.LazyCourseInfo
 import java.lang.Exception
 
 class MainActivity : Activity() {
@@ -27,7 +26,9 @@ class MainActivity : Activity() {
     lateinit var rlMonday: RelativeLayout
     lateinit var courseDatabase: Database
     lateinit var dayCourseDatabase: Database
-    val courseList = mutableListOf<MutableList<CourseInfo>>()
+    lateinit var lazyCourseInfoDatabase: Database
+//    val courseList = mutableListOf<MutableList<CourseInfo>>()
+    val courseList = mutableListOf<MutableList<LazyCourseInfo>>()
     var dayCourseLayout = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +78,7 @@ class MainActivity : Activity() {
 
         courseDatabase = Database(this, "course")
         dayCourseDatabase = Database(this, "dayCourse")
+        lazyCourseInfoDatabase = Database(this, "lazyCourseInfo")
 
         dayCourseLayout.add(R.id.rl_monday)
         dayCourseLayout.add(R.id.rl_tuesday)
@@ -86,9 +88,9 @@ class MainActivity : Activity() {
         dayCourseLayout.add(R.id.rl_saturday)
         dayCourseLayout.add(R.id.rl_sunday)
 
-        val testCourseInfo = CourseInfo(Course("1", "课", "老师"), DayCourse("1", "1", 1, 2, "家"))
+        val testCourseInfo = LazyCourseInfo(Course("1", "课", "老师"), DayCourse("1", "1", 1, 2, "家"))
         courseList.add(mutableListOf(testCourseInfo))
-        val testCourseInfo2 = CourseInfo(Course("1", "课ke", "老师"), DayCourse("1", "1", 1, 1, "家"))
+        val testCourseInfo2 = LazyCourseInfo(Course("1", "课ke", "老师"), DayCourse("1", "1", 1, 1, "家"))
         courseList.add(mutableListOf(testCourseInfo, testCourseInfo2))
         courseList.add(mutableListOf(testCourseInfo2))
 
@@ -137,4 +139,44 @@ class MainActivity : Activity() {
         return Color.argb(0xCC, r, g, b)
     }
 
+    //以后学了再用,现在滚粗啦
+//    inner class LoadingDataFromDatebase : AsyncTaskLoader
+    inner class LoadingDataFromDatebase : AsyncTask<Int?, Int?, Int?>() {
+        val LOADING_DATA_SUCCESS = 0x010
+        override fun doInBackground(vararg params: Int?): Int? {
+//            TODO("Not yet implemented")
+            val mondayList = mutableListOf<LazyCourseInfo>()
+            val tuesdayList = mutableListOf<LazyCourseInfo>()
+            val wednesdayList = mutableListOf<LazyCourseInfo>()
+            val thursdayList = mutableListOf<LazyCourseInfo>()
+            val fridayList = mutableListOf<LazyCourseInfo>()
+            val saturdayList = mutableListOf<LazyCourseInfo>()
+            val sundayList = mutableListOf<LazyCourseInfo>()
+            val data = lazyCourseInfoDatabase.findAll(LazyCourseInfo(Course(), DayCourse()))
+
+            for(i in data){
+                when(){}
+            }
+
+            courseList.add(mondayList)
+            courseList.add(tuesdayList)
+            courseList.add(wednesdayList)
+            courseList.add(thursdayList)
+            courseList.add(fridayList)
+            courseList.add(saturdayList)
+            courseList.add(sundayList)
+            return 0
+        }
+
+        override fun onPostExecute(result: Int?) {
+            when(result){
+                LOADING_DATA_SUCCESS -> {
+                    runOnUiThread{
+                        updateUi()
+                    }
+                }
+//                runOnUiThread(Runnable().apply { updateUi()
+            }
+        }
+    }
 }

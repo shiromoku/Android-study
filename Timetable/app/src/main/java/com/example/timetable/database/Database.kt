@@ -173,6 +173,64 @@ class Database(context: Context, private val tableName: String) {
         return result
     }
 
+    fun findAll(findOjbect: Any): MutableList<Any> {
+        val reader = databaseHelper.readableDatabase
+        val result = mutableListOf<Any>()                   //需要返回的结果
+        var columnsName = emptyArray<String>()              //拥有的列名
+        var findColumnsName = emptyArray<String>()          //作为查找条件的列名
+        var values = emptyArray<String>()                   //查找条件的值
+
+        //反射获取查询数据及返回数据
+        val findValues = findOjbect::class.java.declaredFields
+        for (i in findValues) {
+            i.isAccessible = true
+            columnsName += i.name
+            if (i.get(findOjbect) != null) {
+                findColumnsName += i.name
+                values += i.get(findOjbect).toString()
+            }
+        }
+        val sql = DatabaseTools.generateSQLWith(findColumnsName, " and ")
+
+        //执行查询
+        val cursor = reader.query(tableName, columnsName, sql, values, null, null, null, null)
+        if (cursor.count != 0) {
+            cursor.moveToFirst()
+            do {
+                //遍历构建返回结果
+                val singalObject = findOjbect::class.java.newInstance()
+                for (i in singalObject::class.java.declaredFields) {
+                    i.isAccessible = true
+                    //获取数据库记录值
+                    //警告: 如果实体类字段有误将会抛出异常
+                    val resultValue = when (i.type) {
+                        Byte::class.java ->
+                            cursor.getBlob(cursor.getColumnIndexOrThrow(i.name))
+                        ByteArray::class.java ->
+                            cursor.getBlob(cursor.getColumnIndexOrThrow(i.name))
+                        Double::class.java ->
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(i.name))
+                        Float::class.java ->
+                            cursor.getFloat(cursor.getColumnIndexOrThrow(i.name))
+                        Int::class.java, Integer::class.java ->
+                            cursor.getInt(cursor.getColumnIndexOrThrow(i.name))
+                        Long::class.java ->
+                            cursor.getLong(cursor.getColumnIndexOrThrow(i.name))
+                        Short::class.java ->
+                            cursor.getShort(cursor.getColumnIndexOrThrow(i.name))
+                        String::class.java ->
+                            cursor.getString(cursor.getColumnIndexOrThrow(i.name))
+                        else -> ""
+                    }
+                    i.set(singalObject, resultValue)
+                }
+                //添加至结果
+                result.add(singalObject)
+            } while (cursor.moveToNext())
+        }
+        return result
+    }
+
 
     // TODO: 2021/4/28 重写此方法
     //可能会推迟到需要用到的那天再重写23333

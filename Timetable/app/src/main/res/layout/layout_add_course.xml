@@ -8,61 +8,66 @@
     android:clickable="true"
     android:visibility="visible">
 
-        <androidx.cardview.widget.CardView
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginBottom="100dp"
+        app:cardCornerRadius="30dp"
+        app:contentPaddingBottom="10dp"
+        app:contentPaddingLeft="10dp"
+        app:contentPaddingRight="10dp"
+        app:contentPaddingTop="10dp"
+
+        >
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="100dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginBottom="100dp"
-            app:cardCornerRadius="30dp"
-            app:contentPaddingBottom="10dp"
-            app:contentPaddingLeft="10dp"
-            app:contentPaddingRight="10dp"
-            app:contentPaddingTop="10dp"
+            android:orientation="vertical">
 
-            >
+            <TextView
+                android:id="@+id/tv_add_class_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="添加课程"
+                android:textColor="@color/sky_blue"
+                android:textSize="20dp" />
+
+            <ImageView
+                android:id="@+id/iv_dividing_line"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_below="@id/tv_add_class_title"
+                android:background="@color/sky_blue" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                >
 
-                <TextView
-                    android:id="@+id/tv_add_class_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="添加课程"
-                    android:textColor="@color/sky_blue"
-                    android:textSize="20dp" />
 
-                <ImageView
-                    android:id="@+id/iv_dividing_line"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_below="@id/tv_add_class_title"
-                    android:background="@color/sky_blue" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:layout_below="@id/iv_dividing_line"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="testText"
-                    android:paddingTop="10dp">
+                    android:layout_weight="1">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:textSize="14dp"
-                         />
+                        android:hint="课程编号"
+                        android:textSize="20dp" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+        </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
-
+    </androidx.cardview.widget.CardView>
 
 
 </RelativeLayout>

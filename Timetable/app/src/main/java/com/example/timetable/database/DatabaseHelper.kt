@@ -23,6 +23,16 @@ open class DatabaseHelper(context: Context, databaseName:String, version: Int) :
                 ")"
         db.execSQL(sql)
 
+        sql =  "create table if not EXISTS lazyCourseInfo(" +
+                "courseName text ," +
+                "courseTeacher text " +
+                "day text not null," +
+                "classFrom int," +
+                "classTo int," +
+                "roomLocation text" +
+                ")"
+        db.execSQL(sql)
+
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
