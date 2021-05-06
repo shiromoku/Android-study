@@ -223,7 +223,11 @@
         <!--    </ScrollView>-->
     </RelativeLayout>
 
-    <include layout="@layout/layout_add_course" />
+    <include
+        android:id="@+id/i_add_class"
+        layout="@layout/layout_add_course"
+        android:visibility="gone"
+        />
 
 
 </RelativeLayout>

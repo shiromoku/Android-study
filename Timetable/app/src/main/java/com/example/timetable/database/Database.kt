@@ -193,7 +193,7 @@ class Database(context: Context, private val tableName: String) {
         val sql = DatabaseTools.generateSQLWith(findColumnsName, " and ")
 
         //执行查询
-        val cursor = reader.query(tableName, columnsName, sql, values, null, null, null, null)
+        val cursor = reader.query(tableName, null, null, null, null, null, null, null)
         if (cursor.count != 0) {
             cursor.moveToFirst()
             do {

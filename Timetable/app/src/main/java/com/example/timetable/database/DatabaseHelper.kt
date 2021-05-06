@@ -25,7 +25,7 @@ open class DatabaseHelper(context: Context, databaseName:String, version: Int) :
 
         sql =  "create table if not EXISTS lazyCourseInfo(" +
                 "courseName text ," +
-                "courseTeacher text " +
+                "courseTeacher text, " +
                 "day text not null," +
                 "classFrom int," +
                 "classTo int," +

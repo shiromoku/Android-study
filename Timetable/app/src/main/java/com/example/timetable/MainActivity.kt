@@ -12,6 +12,7 @@ import com.example.timetable.database.Database
 import com.example.timetable.entity.Course
 import com.example.timetable.entity.DayCourse
 import com.example.timetable.entity.LazyCourseInfo
+import com.google.android.material.textfield.TextInputEditText
 import java.lang.Exception
 
 class MainActivity : Activity() {
@@ -19,15 +20,27 @@ class MainActivity : Activity() {
     var itemWidth = 0
     var itemHeight = 0
 
-    var testY = 0
-
     lateinit var llClassNumber: LinearLayout
     lateinit var ivAdd: ImageView
+    lateinit var iAddClass: View
     lateinit var rlMonday: RelativeLayout
+
+    lateinit var etCourseId: TextInputEditText
+    lateinit var etCourseName: TextInputEditText
+    lateinit var etCourseDay: TextInputEditText
+    lateinit var etCourseTimeStart: TextInputEditText
+    lateinit var etCourseTimeEnd: TextInputEditText
+
+    lateinit var btnAddConfirm: Button
+    lateinit var btnAddCancel: Button
+
     lateinit var courseDatabase: Database
     lateinit var dayCourseDatabase: Database
     lateinit var lazyCourseInfoDatabase: Database
-//    val courseList = mutableListOf<MutableList<CourseInfo>>()
+
+    val loadingData = LoadingDataFromDatabase()
+
+    //    val courseList = mutableListOf<MutableList<CourseInfo>>()
     val courseList = mutableListOf<MutableList<LazyCourseInfo>>()
     var dayCourseLayout = mutableListOf<Int>()
 
@@ -43,13 +56,13 @@ class MainActivity : Activity() {
 
     }
 
-    private fun doOnFirstRun(){
+    private fun doOnFirstRun() {
         val sp = getSharedPreferences("classTime", Context.MODE_PRIVATE)
-        if(sp.getBoolean("isFirstRun",true)){
+        if (sp.getBoolean("isFirstRun", true)) {
             val spEdit = sp.edit()
-            spEdit.putBoolean("isFirstRun",false)
-            for(i in 1..12)spEdit.putString("class${i}Time","${i}:00")
-            spEdit.commit()
+            spEdit.putBoolean("isFirstRun", false)
+            for (i in 1..12) spEdit.putString("class${i}Time", "${i}:00")
+            spEdit.apply()
         }
 
     }
@@ -58,22 +71,33 @@ class MainActivity : Activity() {
         llClassNumber = findViewById(R.id.ll_class_number)
         ivAdd = findViewById(R.id.iv_add)
         rlMonday = findViewById(R.id.rl_monday)
+        iAddClass = findViewById(R.id.i_add_class)
+
+        etCourseId = findViewById(R.id.et_course_id)
+        etCourseName = findViewById(R.id.et_course_name)
+        etCourseDay = findViewById(R.id.et_course_day)
+        etCourseTimeStart = findViewById(R.id.et_course_time_start)
+        etCourseTimeEnd = findViewById(R.id.et_course_time_end)
+
+        btnAddConfirm = findViewById(R.id.btn_add_confirm)
+        btnAddCancel = findViewById(R.id.btn_add_cancel)
 
         llClassNumber.post {
             itemWidth = llClassNumber.measuredWidth
             itemHeight = llClassNumber.measuredHeight / classNumber
-
+            //读取上课时间,假的,都是假的
             val sp = getSharedPreferences("classTime", Context.MODE_PRIVATE)
             for (i in 0 until classNumber) {
                 val view = View.inflate(this, R.layout.layout_class_number, null)
                 val tvClassNumber = view.findViewById<TextView>(R.id.tv_class_number)
                 val tvClassTime = view.findViewById<TextView>(R.id.tv_class_time)
                 tvClassNumber.text = (i + 1).toString()
-                tvClassTime.text = sp.getString("class${i+1}Time","???")
+                tvClassTime.text = sp.getString("class${i + 1}Time", "???")
                 val params = LinearLayout.LayoutParams(itemWidth, itemHeight)
                 view.layoutParams = params
                 llClassNumber.addView(view)
             }
+            loadingData.execute(null)
         }
 
         courseDatabase = Database(this, "course")
@@ -88,21 +112,59 @@ class MainActivity : Activity() {
         dayCourseLayout.add(R.id.rl_saturday)
         dayCourseLayout.add(R.id.rl_sunday)
 
-        val testCourseInfo = LazyCourseInfo(Course("1", "课", "老师"), DayCourse("1", "1", 1, 2, "家"))
-        courseList.add(mutableListOf(testCourseInfo))
-        val testCourseInfo2 = LazyCourseInfo(Course("1", "课ke", "老师"), DayCourse("1", "1", 1, 1, "家"))
-        courseList.add(mutableListOf(testCourseInfo, testCourseInfo2))
-        courseList.add(mutableListOf(testCourseInfo2))
-
+//        iAddClass.re
     }
 
     private fun setListener() {
+        btnAddCancel.setOnClickListener {
+            etCourseId.text = null
+            etCourseName.text = null
+            etCourseDay.text = null
+            etCourseTimeStart.text = null
+            etCourseTimeEnd.text = null
+            iAddClass.visibility = View.GONE
+        }
+
+        btnAddConfirm.setOnClickListener {
+            val cId = etCourseId.text.toString()
+            val cName = etCourseName.text.toString()
+            val day = etCourseDay.text.toString()
+            val from = etCourseTimeStart.text.toString().toInt()
+            val to = etCourseTimeEnd.text.toString().toInt()
+            val dayCourse = DayCourse(day, cId, from, to, null)
+            val course = Course(cId, cName, null)
+
+            val lazyCourseInfo = LazyCourseInfo(course, dayCourse)
+
+            Toast.makeText(this, "正在保存", Toast.LENGTH_SHORT).show()
+            btnAddConfirm.isEnabled = false
+            Thread {
+                val result = lazyCourseInfoDatabase.insert(lazyCourseInfo)
+                if (result == 1) {
+                    Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
+                    btnAddCancel.performClick()
+                    when(day){
+                        "1" -> courseList[0].add(lazyCourseInfo)
+                        "2" -> courseList[1].add(lazyCourseInfo)
+                        "3" -> courseList[2].add(lazyCourseInfo)
+                        "4" -> courseList[3].add(lazyCourseInfo)
+                        "5" -> courseList[4].add(lazyCourseInfo)
+                        "6" -> courseList[5].add(lazyCourseInfo)
+                        "7" -> courseList[6].add(lazyCourseInfo)
+                    }
+                    runOnUiThread{updateUi()}
+                } else
+                    Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show()
+            }.run()
+//            val service = this@MainActivity.getSystemService(Context.INPUT_METHOD_SERVICE)
+
+        }
+
         ivAdd.setOnClickListener {
-            updateUi()
+            iAddClass.visibility = View.VISIBLE
         }
     }
 
-    //    inner class UpdateUi : AsyncTaskLoader
     private fun updateUi() {
         if (false && courseList.size != 7) {
             Log.e("On UpdateUi", "updateUi: Incomplete course data")
@@ -141,10 +203,11 @@ class MainActivity : Activity() {
 
     //以后学了再用,现在滚粗啦
 //    inner class LoadingDataFromDatebase : AsyncTaskLoader
-    inner class LoadingDataFromDatebase : AsyncTask<Int?, Int?, Int?>() {
+    inner class LoadingDataFromDatabase : AsyncTask<Int?, Int?, Int?>() {
         val LOADING_DATA_SUCCESS = 0x010
         override fun doInBackground(vararg params: Int?): Int? {
-//            TODO("Not yet implemented")
+            courseList.clear()
+
             val mondayList = mutableListOf<LazyCourseInfo>()
             val tuesdayList = mutableListOf<LazyCourseInfo>()
             val wednesdayList = mutableListOf<LazyCourseInfo>()
@@ -154,8 +217,22 @@ class MainActivity : Activity() {
             val sundayList = mutableListOf<LazyCourseInfo>()
             val data = lazyCourseInfoDatabase.findAll(LazyCourseInfo(Course(), DayCourse()))
 
-            for(i in data){
-                when(){}
+            for (i in data) {
+                val a: LazyCourseInfo = i as LazyCourseInfo
+                when (a.day) {
+                    "1" -> mondayList.add(a)
+                    "2" -> tuesdayList.add(a)
+                    "3" -> wednesdayList.add(a)
+                    "4" -> thursdayList.add(a)
+                    "5" -> fridayList.add(a)
+                    "6" -> saturdayList.add(a)
+                    "7" -> sundayList.add(a)
+                    else -> {
+                        Log.e("MainActivity", "doInBackground: day data out of range")
+                        Toast.makeText(this@MainActivity, "error was happend", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
             }
 
             courseList.add(mondayList)
@@ -165,13 +242,13 @@ class MainActivity : Activity() {
             courseList.add(fridayList)
             courseList.add(saturdayList)
             courseList.add(sundayList)
-            return 0
+            return LOADING_DATA_SUCCESS
         }
 
         override fun onPostExecute(result: Int?) {
-            when(result){
+            when (result) {
                 LOADING_DATA_SUCCESS -> {
-                    runOnUiThread{
+                    runOnUiThread {
                         updateUi()
                     }
                 }
