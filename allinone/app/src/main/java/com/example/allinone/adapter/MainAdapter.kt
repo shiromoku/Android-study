@@ -1,17 +1,21 @@
 package com.example.allinone.adapter
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.allinone.R
 import com.example.allinone.entity.Page
 
-class MainAdapter(val context:Context, val pageList:MutableList<Page>): BaseAdapter() {
+class MainAdapter(private val context: Context, private val pageList: MutableList<Page>) :
+    BaseAdapter() {
     override fun getCount(): Int {
-        return  pageList.size
+        return pageList.size
     }
 
     override fun getItem(position: Int): Any {
@@ -22,19 +26,39 @@ class MainAdapter(val context:Context, val pageList:MutableList<Page>): BaseAdap
         return position.toLong()
     }
 
-    @SuppressLint("ResourceType")
+    //    @SuppressLint("ResourceType", "ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-//        if(pageList.isNotEmpty()) {
-            val page = pageList[position]
-            val view = View.inflate(context, R.layout.layout_page, null)
+        val view : View
+        val holder:PageViewHolder
+        if (convertView == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.layout_page,parent,false)
+            val ivImage = view.findViewById<ImageView>(R.id.iv_image)
             val tvTitle = view.findViewById<TextView>(R.id.tv_title)
             val tvIntro = view.findViewById<TextView>(R.id.tv_intro)
-            tvTitle.text = page.pageTitle
-            tvIntro.text = page.pageIntro
-            return view
-//        }else{
-//            val view = View.inflate(context, R.layout.layout_page, null)
-//            return view
+            holder = PageViewHolder(ivImage,tvTitle,tvIntro)
+            view.tag = holder
+        } else {
+            view = convertView
+            holder = view.tag as PageViewHolder
+        }
+        val page = pageList[position]
+        holder.tvTitle.text = page.pageTitle
+        holder.tvIntro.text = page.pageIntro
+//        holder.ivImage.let {
+//            Glide.with(view)
+//                .load(page.imageUrl)
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                .into(it)
 //        }
+        Glide.with(view)
+            .load(page.imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(holder.ivImage)
+        return view
+    }
+
+    inner class PageViewHolder(val ivImage: ImageView,
+                               val tvTitle: TextView,
+                               val tvIntro: TextView ) {
     }
 }

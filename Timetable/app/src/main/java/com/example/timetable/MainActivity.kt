@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import com.example.timetable.database.Database
@@ -143,7 +144,7 @@ class MainActivity : Activity() {
                 if (result == 1) {
                     Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
                     btnAddCancel.performClick()
-                    when(day){
+                    when (day) {
                         "1" -> courseList[0].add(lazyCourseInfo)
                         "2" -> courseList[1].add(lazyCourseInfo)
                         "3" -> courseList[2].add(lazyCourseInfo)
@@ -152,7 +153,7 @@ class MainActivity : Activity() {
                         "6" -> courseList[5].add(lazyCourseInfo)
                         "7" -> courseList[6].add(lazyCourseInfo)
                     }
-                    runOnUiThread{updateUi()}
+                    runOnUiThread { updateUi() }
                 } else
                     Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show()
             }.run()
@@ -183,15 +184,45 @@ class MainActivity : Activity() {
                 view.layoutParams = layoutParams
                 //课程高亮也在这里加啦
                 //怎么个高法     加边框咯
+                // TODO: 2021/5/19 淦啦,不想写这个功能了
 //                val cvCourseInfo = view.findViewById<CardView>(R.id.cv_course_info)
 //                cvCourseInfo.cardElevation = 300F
 
                 val test = view.findViewById<TextView>(R.id.tv_course_name)
                 test.text = course.courseName
+                view.setOnTouchListener(ClassOnTouchListener())
 
                 layout.addView(view)
             }
         }
+    }
+
+    inner class ClassOnTouchListener() : View.OnTouchListener {
+        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            var flag = true
+            event?.let {
+                when (it.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        Log.e("TAG", "onTouch: -------Down----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
+
+                        flag = true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        Log.e("TAG", "onTouch: -------Up----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}-------", )
+                        flag = false
+                    }
+                    else -> {
+                        Log.e("TAG", "onTouch: ------Else-----------${it.action}----------------", )
+                        flag = true
+                    }
+                }
+            }
+            return flag
+        }
+    }
+
+    fun showOrHideClassCard(v:View){
+
     }
 
     private fun randomColor(): Int {
