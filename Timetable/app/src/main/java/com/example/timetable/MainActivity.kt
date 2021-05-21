@@ -13,6 +13,7 @@ import com.example.timetable.database.Database
 import com.example.timetable.entity.Course
 import com.example.timetable.entity.DayCourse
 import com.example.timetable.entity.LazyCourseInfo
+import com.example.timetable.viewHolder.CourseHolder
 import com.google.android.material.textfield.TextInputEditText
 import java.lang.Exception
 
@@ -184,13 +185,16 @@ class MainActivity : Activity() {
                 view.layoutParams = layoutParams
                 //课程高亮也在这里加啦
                 //怎么个高法     加边框咯
-                // TODO: 2021/5/19 淦啦,不想写这个功能了
+                // TODO: 2021/5/19 淦啦,我不想写这个功能了
 //                val cvCourseInfo = view.findViewById<CardView>(R.id.cv_course_info)
 //                cvCourseInfo.cardElevation = 300F
 
-                val test = view.findViewById<TextView>(R.id.tv_course_name)
-                test.text = course.courseName
+                val text = view.findViewById<TextView>(R.id.tv_course_name)
+                text.text = course.courseName
                 view.setOnTouchListener(ClassOnTouchListener())
+
+                val holder = CourseHolder(text)
+                view.tag = holder
 
                 layout.addView(view)
             }
@@ -199,6 +203,8 @@ class MainActivity : Activity() {
 
     inner class ClassOnTouchListener() : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            val holder = v?.tag as CourseHolder
+            Log.e("TAG", "onTouch: ++++++++++++++++++++${holder.tvCourseName.text}+++++++++++++++++++", )
             var flag = true
             event?.let {
                 when (it.action) {
@@ -211,6 +217,16 @@ class MainActivity : Activity() {
                         Log.e("TAG", "onTouch: -------Up----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}-------", )
                         flag = false
                     }
+                    MotionEvent.ACTION_CANCEL -> {
+                        Log.e("TAG", "onTouch: -------Cancel----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
+
+                        flag = true
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+//                        Log.e("TAG", "onTouch: -------Move----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
+
+                        flag = true
+                    }
                     else -> {
                         Log.e("TAG", "onTouch: ------Else-----------${it.action}----------------", )
                         flag = true
@@ -221,7 +237,7 @@ class MainActivity : Activity() {
         }
     }
 
-    fun showOrHideClassCard(v:View){
+    fun showOrHideClassCard(holder:CourseHolder,v:View){
 
     }
 
