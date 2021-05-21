@@ -42,9 +42,18 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_toStartOf="@id/iv_setting"
-                android:layout_toLeftOf="@id/iv_setting"
+                android:layout_alignParentRight="true"
                 android:src="@drawable/add" />
+<!--            <ImageView-->
+<!--                android:id="@+id/iv_add"-->
+<!--                android:layout_width="30dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:layout_centerVertical="true"-->
+<!--                android:layout_marginEnd="10dp"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:layout_toStartOf="@id/iv_setting"-->
+<!--                android:layout_toLeftOf="@id/iv_setting"-->
+<!--                android:src="@drawable/add" />-->
 
             <ImageView
                 android:id="@+id/iv_setting"
@@ -53,6 +62,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:visibility="gone"
                 android:src="@drawable/setting" />
 
         </RelativeLayout>
@@ -228,6 +238,26 @@
         layout="@layout/layout_add_course"
         android:visibility="gone"
         />
+
+    <View
+        android:id="@+id/v_split"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerVertical="true"
+        />
+    <RelativeLayout
+        android:id="@+id/v_top_class_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/v_split"
+        />
+    <View
+        android:id="@+id/v_bottom_class_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/v_split"
+        />
+
 
 
 
