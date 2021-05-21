@@ -25,6 +25,7 @@ class MainActivity : Activity() {
     lateinit var ivAdd: ImageView
     lateinit var iAddClass: View
     lateinit var rlMonday: RelativeLayout
+    lateinit var vTopClassDetail: RelativeLayout
 
     lateinit var etCourseId: TextInputEditText
     lateinit var etCourseName: TextInputEditText
@@ -54,6 +55,8 @@ class MainActivity : Activity() {
         initPart()
         setListener()
 
+        vTopClassDetail.removeAllViewsInLayout()
+
 
     }
 
@@ -73,6 +76,7 @@ class MainActivity : Activity() {
         ivAdd = findViewById(R.id.iv_add)
         rlMonday = findViewById(R.id.rl_monday)
         iAddClass = findViewById(R.id.i_add_class)
+        vTopClassDetail = findViewById(R.id.v_top_class_detail)
 
         etCourseId = findViewById(R.id.et_course_id)
         etCourseName = findViewById(R.id.et_course_name)
