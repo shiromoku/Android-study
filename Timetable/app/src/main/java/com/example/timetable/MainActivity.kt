@@ -6,8 +6,10 @@ import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import com.example.timetable.database.Database
 import com.example.timetable.entity.Course
@@ -27,6 +29,7 @@ class MainActivity : Activity() {
     lateinit var iAddClass: View
     lateinit var rlMonday: RelativeLayout
     lateinit var vTopClassDetail: RelativeLayout
+    lateinit var vBottomClassDetail: RelativeLayout
 
     lateinit var etCourseId: TextInputEditText
     lateinit var etCourseName: TextInputEditText
@@ -42,6 +45,7 @@ class MainActivity : Activity() {
     lateinit var lazyCourseInfoDatabase: Database
 
     val loadingData = LoadingDataFromDatabase()
+    var isCourseDetailShowed = false
 
     //    val courseList = mutableListOf<MutableList<CourseInfo>>()
     val courseList = mutableListOf<MutableList<LazyCourseInfo>>()
@@ -78,6 +82,7 @@ class MainActivity : Activity() {
         rlMonday = findViewById(R.id.rl_monday)
         iAddClass = findViewById(R.id.i_add_class)
         vTopClassDetail = findViewById(R.id.v_top_class_detail)
+        vBottomClassDetail = findViewById(R.id.v_bottom_class_detail)
 
         etCourseId = findViewById(R.id.et_course_id)
         etCourseName = findViewById(R.id.et_course_name)
@@ -197,7 +202,7 @@ class MainActivity : Activity() {
                 text.text = course.courseName
                 view.setOnTouchListener(ClassOnTouchListener())
 
-                val holder = CourseHolder(text)
+                val holder = CourseHolder(text,course.classFrom)
                 view.tag = holder
 
                 layout.addView(view)
@@ -208,40 +213,56 @@ class MainActivity : Activity() {
     inner class ClassOnTouchListener() : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             val holder = v?.tag as CourseHolder
-            Log.e("TAG", "onTouch: ++++++++++++++++++++${holder.tvCourseName.text}+++++++++++++++++++", )
             var flag = true
             event?.let {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        Log.e("TAG", "onTouch: -------Down----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
-
+                        showClassCard(holder)
                         flag = true
                     }
                     MotionEvent.ACTION_UP -> {
-                        Log.e("TAG", "onTouch: -------Up----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}-------", )
+                        hideClassCard()
                         flag = false
                     }
                     MotionEvent.ACTION_CANCEL -> {
-                        Log.e("TAG", "onTouch: -------Cancel----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
-
                         flag = true
                     }
                     MotionEvent.ACTION_MOVE -> {
-//                        Log.e("TAG", "onTouch: -------Move----------${v?.x}-----${v?.y}---------${v?.width}----${v?.height}------------", )
-
                         flag = true
                     }
                     else -> {
-                        Log.e("TAG", "onTouch: ------Else-----------${it.action}----------------", )
                         flag = true
                     }
                 }
             }
+//            return true
             return flag
         }
     }
 
-    fun showOrHideClassCard(holder:CourseHolder,v:View){
+    fun showClassCard(holder:CourseHolder){
+            val view = LayoutInflater.from(this).inflate(R.layout.layout_course_detail, null)
+            val courseName = view.findViewById<TextView>(R.id.tv_lcd_course_name)
+            courseName.text = holder.tvCourseName.text
+            val layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT,RelativeLayout.TRUE)
+            view.layoutParams = layoutParams
+        if(holder.from >= classNumber/2) {
+            vTopClassDetail.removeAllViews()
+            vTopClassDetail.addView(view)
+            vTopClassDetail.visibility = View.VISIBLE
+        }else{
+            vBottomClassDetail.removeAllViews()
+            vBottomClassDetail.addView(view)
+            vBottomClassDetail.visibility = View.VISIBLE
+        }
+            isCourseDetailShowed = true
+    }
+
+    fun hideClassCard(){
+            vTopClassDetail.visibility = View.GONE
+            vBottomClassDetail.visibility = View.GONE
+            isCourseDetailShowed = false
 
     }
 
