@@ -7,7 +7,16 @@
     <TextView
         android:id="@+id/tv_lcd_course_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textSize="30sp"
+        />
+    <TextView
+        android:id="@+id/tv_lcd_course_location"
+        android:layout_below="@id/tv_lcd_course_name"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
         android:layout_centerInParent="true"
         android:gravity="center"
         android:textSize="30sp"

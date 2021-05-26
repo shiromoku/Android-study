@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import com.example.timetable.database.Database
 import com.example.timetable.entity.Course
@@ -24,6 +25,10 @@ class MainActivity : Activity() {
     var itemWidth = 0
     var itemHeight = 0
 
+    var dayInt = 0
+    var courseFromInt = 0
+    var courseToInt = 0
+
     lateinit var llClassNumber: LinearLayout
     lateinit var ivAdd: ImageView
     lateinit var iAddClass: View
@@ -33,9 +38,15 @@ class MainActivity : Activity() {
 
     lateinit var etCourseId: TextInputEditText
     lateinit var etCourseName: TextInputEditText
-    lateinit var etCourseDay: TextInputEditText
-    lateinit var etCourseTimeStart: TextInputEditText
-    lateinit var etCourseTimeEnd: TextInputEditText
+
+//    lateinit var etCourseDay: TextInputEditText
+//    lateinit var etCourseTimeStart: TextInputEditText
+//    lateinit var etCourseTimeEnd: TextInputEditText
+
+    lateinit var sLacCourseDay: Spinner
+    lateinit var sLacCourseTimeFrom: Spinner
+    lateinit var sLacCourseTimeTo: Spinner
+    lateinit var etCourseLocation: TextInputEditText
 
     lateinit var btnAddConfirm: Button
     lateinit var btnAddCancel: Button
@@ -77,6 +88,9 @@ class MainActivity : Activity() {
     }
 
     private fun initPart() {
+        val rankOfWeek = arrayOf("一", "二", "三", "四", "五", "六", "日")
+        val rankOfCrouse = arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
+
         llClassNumber = findViewById(R.id.ll_class_number)
         ivAdd = findViewById(R.id.iv_add)
         rlMonday = findViewById(R.id.rl_monday)
@@ -86,9 +100,20 @@ class MainActivity : Activity() {
 
         etCourseId = findViewById(R.id.et_course_id)
         etCourseName = findViewById(R.id.et_course_name)
-        etCourseDay = findViewById(R.id.et_course_day)
-        etCourseTimeStart = findViewById(R.id.et_course_time_start)
-        etCourseTimeEnd = findViewById(R.id.et_course_time_end)
+//        etCourseDay = findViewById(R.id.et_course_day)
+//        etCourseTimeStart = findViewById(R.id.et_course_time_start)
+//        etCourseTimeEnd = findViewById(R.id.et_course_time_end)
+
+        sLacCourseDay = findViewById(R.id.s_lac_course_day)
+        sLacCourseTimeFrom = findViewById(R.id.s_lac_course_time_from)
+        sLacCourseTimeTo = findViewById(R.id.s_lac_course_time_to)
+
+        sLacCourseDay.adapter = ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,rankOfWeek)
+        sLacCourseTimeFrom.adapter = ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,rankOfCrouse)
+        sLacCourseTimeTo.adapter = ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,rankOfCrouse)
+
+
+        etCourseLocation = findViewById(R.id.et_course_location)
 
         btnAddConfirm = findViewById(R.id.btn_add_confirm)
         btnAddCancel = findViewById(R.id.btn_add_cancel)
@@ -127,25 +152,71 @@ class MainActivity : Activity() {
     }
 
     private fun setListener() {
+
+
+        sLacCourseDay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                dayInt = position + 1
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+        }
+
+        sLacCourseTimeFrom.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                courseFromInt = position + 1
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+        }
+        sLacCourseTimeTo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                courseToInt = position + 1
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+        }
+
         btnAddCancel.setOnClickListener {
             etCourseId.text = null
             etCourseName.text = null
-            etCourseDay.text = null
-            etCourseTimeStart.text = null
-            etCourseTimeEnd.text = null
             iAddClass.visibility = View.GONE
         }
 
         btnAddConfirm.setOnClickListener {
             val cId = etCourseId.text.toString()
             val cName = etCourseName.text.toString()
-            val day = etCourseDay.text.toString()
-            val from = etCourseTimeStart.text.toString().toInt()
-            val to = etCourseTimeEnd.text.toString().toInt()
-            val dayCourse = DayCourse(day, cId, from, to, null)
+            val day = dayInt.toString()
+            val from = courseFromInt
+            val to = courseToInt
+            val location = etCourseLocation.text.toString()
+
+            val dayCourse = DayCourse(day, cId, from, to, location)
             val course = Course(cId, cName, null)
 
             val lazyCourseInfo = LazyCourseInfo(course, dayCourse)
+
 
             Toast.makeText(this, "正在保存", Toast.LENGTH_SHORT).show()
             btnAddConfirm.isEnabled = false
@@ -153,6 +224,7 @@ class MainActivity : Activity() {
                 val result = lazyCourseInfoDatabase.insert(lazyCourseInfo)
                 if (result == 1) {
                     Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
+                    btnAddConfirm.isEnabled = true
                     btnAddCancel.performClick()
                     when (day) {
                         "1" -> courseList[0].add(lazyCourseInfo)
@@ -163,7 +235,11 @@ class MainActivity : Activity() {
                         "6" -> courseList[5].add(lazyCourseInfo)
                         "7" -> courseList[6].add(lazyCourseInfo)
                     }
-                    runOnUiThread { updateUi() }
+                    runOnUiThread {
+                        val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)
+                        updateUi()
+                    }
                 } else
                     Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show()
             }.run()
@@ -200,9 +276,13 @@ class MainActivity : Activity() {
 
                 val text = view.findViewById<TextView>(R.id.tv_course_name)
                 text.text = course.courseName
+                val location = view.findViewById<TextView>(R.id.tv_course_location)
+                location.text = course.roomLocation
+
+
                 view.setOnTouchListener(ClassOnTouchListener())
 
-                val holder = CourseHolder(text,course.classFrom)
+                val holder = CourseHolder(course)
                 view.tag = holder
 
                 layout.addView(view)
@@ -210,7 +290,7 @@ class MainActivity : Activity() {
         }
     }
 
-    inner class ClassOnTouchListener() : View.OnTouchListener {
+    inner class ClassOnTouchListener : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             val holder = v?.tag as CourseHolder
             var flag = true
@@ -240,29 +320,36 @@ class MainActivity : Activity() {
         }
     }
 
-    fun showClassCard(holder:CourseHolder){
-            val view = LayoutInflater.from(this).inflate(R.layout.layout_course_detail, null)
-            val courseName = view.findViewById<TextView>(R.id.tv_lcd_course_name)
-            courseName.text = holder.tvCourseName.text
-            val layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT,RelativeLayout.TRUE)
-            view.layoutParams = layoutParams
-        if(holder.from >= classNumber/2) {
+    fun showClassCard(holder: CourseHolder) {
+        val view = LayoutInflater.from(this).inflate(R.layout.layout_course_detail, null)
+        val courseName = view.findViewById<TextView>(R.id.tv_lcd_course_name)
+        val courseLocation = view.findViewById<TextView>(R.id.tv_lcd_course_location)
+        val from = holder.lazyCourseInfo.classFrom
+        courseName.text = holder.lazyCourseInfo.courseName
+        courseLocation.text = holder.lazyCourseInfo.roomLocation
+//        val layoutParams = RelativeLayout.LayoutParams(
+//            ViewGroup.LayoutParams.WRAP_CONTENT,
+//            ViewGroup.LayoutParams.WRAP_CONTENT
+//        )
+        val layoutParams = RelativeLayout.LayoutParams(500,400)
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+        view.layoutParams = layoutParams
+        if (from >= classNumber / 2) {
             vTopClassDetail.removeAllViews()
             vTopClassDetail.addView(view)
             vTopClassDetail.visibility = View.VISIBLE
-        }else{
+        } else {
             vBottomClassDetail.removeAllViews()
             vBottomClassDetail.addView(view)
             vBottomClassDetail.visibility = View.VISIBLE
         }
-            isCourseDetailShowed = true
+        isCourseDetailShowed = true
     }
 
-    fun hideClassCard(){
-            vTopClassDetail.visibility = View.GONE
-            vBottomClassDetail.visibility = View.GONE
-            isCourseDetailShowed = false
+    fun hideClassCard() {
+        vTopClassDetail.visibility = View.GONE
+        vBottomClassDetail.visibility = View.GONE
+        isCourseDetailShowed = false
 
     }
 
