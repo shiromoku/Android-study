@@ -28,14 +28,14 @@ class MainAdapter(private val context: Context, private val pageList: MutableLis
 
     //    @SuppressLint("ResourceType", "ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val view : View
-        val holder:PageViewHolder
+        val view: View
+        val holder: PageViewHolder
         if (convertView == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.layout_page,parent,false)
+            view = LayoutInflater.from(context).inflate(R.layout.layout_page, parent, false)
             val ivImage = view.findViewById<ImageView>(R.id.iv_image)
             val tvTitle = view.findViewById<TextView>(R.id.tv_title)
             val tvIntro = view.findViewById<TextView>(R.id.tv_intro)
-            holder = PageViewHolder(ivImage,tvTitle,tvIntro)
+            holder = PageViewHolder(ivImage, tvTitle, tvIntro)
             view.tag = holder
         } else {
             view = convertView
@@ -50,15 +50,20 @@ class MainAdapter(private val context: Context, private val pageList: MutableLis
 //                .diskCacheStrategy(DiskCacheStrategy.ALL)
 //                .into(it)
 //        }
+
         Glide.with(view)
             .load(page.imageUrl)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
+//            .diskCacheStrategy(DiskCacheStrategy.ALL)
+//            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
             .into(holder.ivImage)
         return view
     }
 
-    inner class PageViewHolder(val ivImage: ImageView,
-                               val tvTitle: TextView,
-                               val tvIntro: TextView ) {
+    inner class PageViewHolder(
+        val ivImage: ImageView,
+        val tvTitle: TextView,
+        val tvIntro: TextView
+    ) {
     }
 }

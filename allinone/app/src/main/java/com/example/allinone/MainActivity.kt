@@ -1,12 +1,14 @@
 package com.example.allinone
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
+import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.ListView
-import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.allinone.adapter.MainAdapter
 import com.example.allinone.entity.Page
@@ -14,24 +16,26 @@ import okhttp3.*
 import org.json.JSONArray
 import java.io.IOException
 
-class MainActivity : AppCompatActivity() {
-    val LOAD_DATE_DONE = 0x001
+class MainActivity : Activity()/*, View.OnKeyListener */ {
+    val LOAD_DATA_DONE = 0x001
     val pageList: MutableList<Page> = mutableListOf()
-    lateinit var llMain : ListView
+    lateinit var lvMain: ListView
+    lateinit var ivUserAvatar: ImageView
+    val mainAdapter = MainAdapter(this, pageList)
 
-    lateinit var mainHandler : Handler
+    lateinit var mainHandler: Handler
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        llMain = findViewById(R.id.ll_main)
-        val mainAdapter = MainAdapter(this,pageList)
-        llMain.adapter = mainAdapter
 
-        mainHandler = object : Handler(mainLooper){
+        initPart()
+        setListener()
+
+        mainHandler = object : Handler(mainLooper) {
             override fun handleMessage(msg: Message) {
-                when(msg.what){
-                    LOAD_DATE_DONE -> {
-                        runOnUiThread{
+                when (msg.what) {
+                    LOAD_DATA_DONE -> {
+                        runOnUiThread {
                             mainAdapter.notifyDataSetChanged()
                         }
                     }
@@ -39,7 +43,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Thread{
+        loadData()
+
+    }
+
+    private fun loadData() {
+        Thread {
             val url = getString(R.string.baseUrl)
             val client = OkHttpClient()
             val request = Request.Builder()
@@ -54,23 +63,51 @@ class MainActivity : AppCompatActivity() {
                 @Throws(IOException::class)
                 override fun onResponse(call: Call?, response: Response) {
                     if (response.isSuccessful) {
-                        // String str = response.body().string();
                         val str = response.body().string()
                         val jsonArray = JSONArray(str)
-                        for(i in 0 until  jsonArray.length()){
+                        for (i in 0 until jsonArray.length()) {
                             val a = jsonArray.getJSONObject(i)
                             val p = Page(a)
                             pageList.add(p)
                         }
-                        runOnUiThread{
+                        runOnUiThread {
                             mainAdapter.notifyDataSetChanged()
                         }
-                    }else{
-                        Log.e("TAG", "onResponse: -------------unSuccessful----------------", )
+                    } else {
+                        Log.e("TAG", "onResponse: -------------unSuccessful----------------")
                     }
                 }
             })
         }.run()
+    }
+
+    private fun setListener() {
+        lvMain.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                val newActivityIntent = Intent(this, Web::class.java)
+                val date = Bundle()
+                date.putString("url", pageList[position].pageUrl)
+                newActivityIntent.putExtras(date)
+                startActivity(newActivityIntent)
+            }
+        ivUserAvatar.setOnClickListener {
+            val newActivityIntent = Intent(this, UserInfo::class.java)
+            startActivity(newActivityIntent)
+        }
+    }
+
+    private fun initPart() {
+        lvMain = findViewById(R.id.lv_main)
+        ivUserAvatar = findViewById(R.id.iv_user_avatar)
+
+
+        Glide.with(this)
+            .load(R.drawable.user_avatar_full_fill)
+            .into(ivUserAvatar)
+
+
+
+        lvMain.adapter = mainAdapter
 
     }
 }
