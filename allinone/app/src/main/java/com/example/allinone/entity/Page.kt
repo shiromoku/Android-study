@@ -18,7 +18,7 @@ class Page() {
     }
 
     override fun toString(): String {
-        return "Page(pageTitle='$pageTitle', pageIntro='$pageIntro', imageUrl='$imageUrl')"
+        return "Page(pageType='$pageType', pageTitle='$pageTitle', pageIntro='$pageIntro', imageUrl='$imageUrl', pageUrl='$pageUrl')"
     }
 
 

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="baseUrl">http://jump.shiromoku.com:29489</string>
+    <string name="baseUrl">http://jump.shiromoku.com:29489/php/flush.php</string>
 </resources>

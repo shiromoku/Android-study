@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AllInOne"
         android:usesCleartextTraffic="true">
-        <activity android:name=".UserInfo"></activity>
+        <activity android:name=".LoginRegister"></activity>
+        <activity android:name=".UserInfo" />
         <activity android:name=".Web" />
         <activity android:name=".MainActivity">
             <intent-filter>

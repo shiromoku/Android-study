@@ -15,6 +15,7 @@ import com.example.allinone.entity.Page
 import okhttp3.*
 import org.json.JSONArray
 import java.io.IOException
+import java.lang.Exception
 
 class MainActivity : Activity()/*, View.OnKeyListener */ {
     val LOAD_DATA_DONE = 0x001
@@ -64,6 +65,7 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
                 override fun onResponse(call: Call?, response: Response) {
                     if (response.isSuccessful) {
                         val str = response.body().string()
+
                         val jsonArray = JSONArray(str)
                         for (i in 0 until jsonArray.length()) {
                             val a = jsonArray.getJSONObject(i)
@@ -71,7 +73,7 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
                             pageList.add(p)
                         }
                         runOnUiThread {
-                            mainAdapter.notifyDataSetChanged()
+                                mainAdapter.notifyDataSetChanged()
                         }
                     } else {
                         Log.e("TAG", "onResponse: -------------unSuccessful----------------")
