@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
+import okhttp3.*
+import java.io.IOException
 
 class LoginRegister : AppCompatActivity() {
     val LOGIN_SUCCESSFUL = 0x001
@@ -13,6 +16,7 @@ class LoginRegister : AppCompatActivity() {
 
     lateinit var tietUserName: TextInputEditText
     lateinit var tietPassword: TextInputEditText
+    lateinit var btnLogin: Button
 
     lateinit var handler: Handler
     var userName = ""
@@ -22,6 +26,7 @@ class LoginRegister : AppCompatActivity() {
         setContentView(R.layout.activity_login_register)
         tietUserName = findViewById(R.id.tiet_user_name)
         tietPassword = findViewById(R.id.tiet_password)
+        btnLogin = findViewById(R.id.btn_login)
 
         handler = object:Handler(mainLooper){
             override fun handleMessage(msg: Message) {
@@ -54,14 +59,41 @@ class LoginRegister : AppCompatActivity() {
         tietUserName.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 userName = tietUserName.text.toString()
-                if (userName == "") tietUserName.error = "用户名不能为空"
+                if (userName == "") {
+                    tietUserName.error = "用户名不能为空"
+                    btnLogin.isEnabled = false
+                }
+                else btnLogin.isEnabled = true
             }
         }
         tietPassword.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 password = tietPassword.text.toString()
-                if (password == "") tietPassword.error = "密码不能为空"
+                if (password == "") {
+                    tietPassword.error = "密码不能为空"
+                    btnLogin.isEnabled = false
+                }else btnLogin.isEnabled = true
             }
+        }
+
+        btnLogin.setOnClickListener{
+            Thread{
+                val url = getString(R.string.baseUrl) + getString(R.string.login)
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .get()
+                    .url(url)
+                    .build()
+                client.newCall(request).enqueue(object: Callback{
+                    override fun onFailure(call: Call?, e: IOException?) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onResponse(call: Call?, response: Response?) {
+                        TODO("Not yet implemented")
+                    }
+                })
+            }.run()
         }
     }
 

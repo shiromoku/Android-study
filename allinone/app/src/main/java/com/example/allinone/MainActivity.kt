@@ -50,7 +50,7 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
 
     private fun loadData() {
         Thread {
-            val url = getString(R.string.baseUrl)
+            val url = getString(R.string.baseUrl) + getString(R.string.news)
             val client = OkHttpClient()
             val request = Request.Builder()
                 .get()
