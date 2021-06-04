@@ -10,7 +10,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class UserInfo : AppCompatActivity() {
-    private val LOGIN = 0x001
+    private val REQUEST_LOGIN = 0x001
+    companion object {
+        val RESULT_LOGIN_SUCCESSFUL = 0x001
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_info)
@@ -41,7 +44,7 @@ class UserInfo : AppCompatActivity() {
             tvLogout.visibility = View.GONE
             rlUserInfo.setOnClickListener {
                 val newActivity = Intent(this, LoginRegister::class.java)
-                startActivityForResult(newActivity, LOGIN)
+                startActivityForResult(newActivity, REQUEST_LOGIN)
             }
         }
     }
@@ -49,7 +52,7 @@ class UserInfo : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode){
-            LOGIN -> {
+            REQUEST_LOGIN -> {
 
             }
         }
