@@ -7,9 +7,10 @@ import android.os.Handler
 import android.os.Message
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
+import com.example.allinone.tools.EncryptTool
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
@@ -64,7 +65,7 @@ class LoginRegister : AppCompatActivity() {
                 userName = tietUserName.text.toString()
                 if (userName == "") {
                     tietUserName.error = "用户名不能为空"
-                    btnLogin.isEnabled = false
+//                    btnLogin.isEnabled = false
                 } else btnLogin.isEnabled = true
             }
         }
@@ -73,32 +74,48 @@ class LoginRegister : AppCompatActivity() {
                 password = tietPassword.text.toString()
                 if (password == "") {
                     tietPassword.error = "密码不能为空"
-                    btnLogin.isEnabled = false
+//                    btnLogin.isEnabled = false
                 } else btnLogin.isEnabled = true
             }
         }
 
         btnLogin.setOnClickListener {
+            userName = tietUserName.text.toString()
+            password = tietPassword.text.toString()
+            userName = "123456"
+            password = "123456"
             Thread {
                 val url = getString(R.string.baseUrl) + getString(R.string.login)
                 val client = OkHttpClient()
+                val formBody =
+                    FormBody.Builder().add("userName", EncryptTool.md5(userName)).add("password", EncryptTool.md5(password)).build()
                 val request = Request.Builder()
-                    .get()
+                    .post(formBody)
                     .url(url)
                     .build()
                 client.newCall(request).enqueue(object : Callback {
                     override fun onFailure(call: Call?, e: IOException?) {
-                        TODO("Not yet implemented")
+//                        TODO("Not yet implemented")
+                        Log.e("TAG", "onFailure: ++++++++++++++++++++++++++++")
                     }
 
                     override fun onResponse(call: Call?, response: Response?) {
 //                        TODO("Not yet implemented")
+
                         val body = response?.body()?.string() ?: ""
+                        Log.e("TAG", "onResponse: ---------------$body----------")
                         if (body != "") {
                             val result = JSONObject(body)
-                            if(result.getInt("resultCode") == 200){
-                                val data = result.getJSONObject("data")
-                                Log.e("TAG", "onResponse: -------------${data.getString("userName")}------------", )
+                            if (result.getInt("resultCode") == 200) {
+                                val data = JSONObject(result.getJSONArray("data").get(0).toString())
+                                Log.e(
+                                    "TAG",
+                                    "onResponse: -------------${data.getString("userAvatar")}------------",
+                                )
+//                                Log.e(
+//                                    "TAG",
+//                                    "onResponse: -------------${data.getString("userAvatar")}------------",
+//                                )
                             }
                         }
                     }

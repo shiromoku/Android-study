@@ -36,6 +36,6 @@ class ExampleUnitTest {
 
     @Test
     fun addition_isCorrect() {
-        println(md5("123456") + "         123456")
+        println(md5("shiromoku") + "         123456")
     }
 }
