@@ -39,7 +39,7 @@ class LoginRegister : AppCompatActivity() {
                         val data = msg.data
                         val spEdit = getSharedPreferences("allInOne", Context.MODE_PRIVATE).edit()
                         spEdit.putBoolean("isLogin", true)
-                        spEdit.putString("userName", data.getString("userName"))
+                        spEdit.putString("userName", userName)
                         spEdit.putString("userAvatar", data.getString("userAvatar"))
                         spEdit.apply()
                         setResult(UserInfo.RESULT_LOGIN_SUCCESSFUL)
@@ -108,10 +108,19 @@ class LoginRegister : AppCompatActivity() {
                             val result = JSONObject(body)
                             if (result.getInt("resultCode") == 200) {
                                 val data = JSONObject(result.getJSONArray("data").get(0).toString())
-                                Log.e(
-                                    "TAG",
-                                    "onResponse: -------------${data.getString("userAvatar")}------------",
-                                )
+                                val userAvatar = data.getString("userAvatar")
+                                val bundleData = Bundle().apply {
+                                    putString("userAvatar",userAvatar)
+                                }
+                                val msg = Message().apply {
+                                    what = LOGIN_SUCCESSFUL
+                                    this.data = bundleData
+                                }
+                                handler.sendMessage(msg)
+//                                Log.e(
+//                                    "TAG",
+//                                    "onResponse: -------------${data.getString("userAvatar")}------------",
+//                                )
 //                                Log.e(
 //                                    "TAG",
 //                                    "onResponse: -------------${data.getString("userAvatar")}------------",

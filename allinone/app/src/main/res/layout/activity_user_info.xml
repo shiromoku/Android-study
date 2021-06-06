@@ -3,12 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
     tools:context=".UserInfo">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:visibility="gone"
         android:text="暂不提供用户相关功能 : P"
         android:textSize="30sp" />
 
@@ -30,6 +33,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
             android:layout_toEndOf="@id/iv_aui_user_avatar"
             android:layout_toRightOf="@id/iv_aui_user_avatar" />
     </RelativeLayout>
@@ -40,8 +44,8 @@
         android:layout_height="0dp"
         android:layout_centerInParent="true" />
 
-    <TextView
-        android:id="@+id/tv_logout"
+    <Button
+        android:id="@+id/btn_logout"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,6 +55,7 @@
         android:visibility="gone"
         android:text="退出登陆"
         android:textColor="@android:color/holo_red_light"
+        android:background="@android:color/transparent"
         />
 
 </RelativeLayout>
