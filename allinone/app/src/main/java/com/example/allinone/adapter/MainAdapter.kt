@@ -13,7 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.allinone.R
 import com.example.allinone.entity.Page
 
-class MainAdapter(private val context: Context, private val pageList: MutableList<Page>) :
+class MainAdapter(private val context: Context?, private val pageList: MutableList<Page>) :
     BaseAdapter() {
     override fun getCount(): Int {
         return pageList.size

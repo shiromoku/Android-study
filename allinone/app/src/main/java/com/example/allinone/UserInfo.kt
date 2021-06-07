@@ -61,12 +61,13 @@ class UserInfo : AppCompatActivity() {
             Glide.with(this)
                 .load(getString(R.string.baseUrl) + userAvatar)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .apply(RequestOptions.bitmapTransform(CircleCrop()))
                 .into(ivUserAvatar)
             tvUserName.text = userName
         } else {
             btnLogout.visibility = View.GONE
             rlUserInfo.setOnClickListener {
-                val newActivity = Intent(this, LoginRegister::class.java)
+                val newActivity = Intent(this, Login::class.java)
                 startActivityForResult(newActivity, REQUEST_LOGIN)
             }
             tvUserName.text = "点击头像登陆"

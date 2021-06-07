@@ -3,4 +3,6 @@
     <string name="baseUrl">http://jump.shiromoku.com:29489</string>
     <string name="news">/php/flush.php</string>
     <string name="login">/php/login.php</string>
+    <string name="register">/php/register.php</string>
+    <string name="default_avatar">/userAvatar/default_avatar.jpg</string>
 </resources>

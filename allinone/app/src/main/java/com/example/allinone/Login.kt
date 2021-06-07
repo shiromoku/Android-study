@@ -1,12 +1,14 @@
 package com.example.allinone
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.example.allinone.tools.EncryptTool
 import com.google.android.material.textfield.TextInputEditText
@@ -14,7 +16,7 @@ import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 
-class LoginRegister : AppCompatActivity() {
+class Login : AppCompatActivity() {
     val LOGIN_SUCCESSFUL = 0x001
     val LOGIN_FAILED = 0x002
 
@@ -27,7 +29,7 @@ class LoginRegister : AppCompatActivity() {
     var password = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login_register)
+        setContentView(R.layout.activity_login)
         tietUserName = findViewById(R.id.tiet_user_name)
         tietPassword = findViewById(R.id.tiet_password)
         btnLogin = findViewById(R.id.btn_login)
@@ -60,6 +62,12 @@ class LoginRegister : AppCompatActivity() {
     }
 
     private fun setListener() {
+        val tvRegister = findViewById<TextView>(R.id.tv_register)
+        tvRegister.setOnClickListener {
+            val intent = Intent(this,Register::class.java)
+            startActivity(intent)
+        }
+
         tietUserName.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 userName = tietUserName.text.toString()
@@ -106,17 +114,18 @@ class LoginRegister : AppCompatActivity() {
                         Log.e("TAG", "onResponse: ---------------$body----------")
                         if (body != "") {
                             val result = JSONObject(body)
-                            if (result.getInt("resultCode") == 200) {
-                                val data = JSONObject(result.getJSONArray("data").get(0).toString())
-                                val userAvatar = data.getString("userAvatar")
-                                val bundleData = Bundle().apply {
-                                    putString("userAvatar",userAvatar)
-                                }
-                                val msg = Message().apply {
-                                    what = LOGIN_SUCCESSFUL
-                                    this.data = bundleData
-                                }
-                                handler.sendMessage(msg)
+                            when(result.getInt("resultCode")){
+                                200 -> {
+                                    val data = JSONObject(result.getJSONArray("data").get(0).toString())
+                                    val userAvatar = data.getString("userAvatar")
+                                    val bundleData = Bundle().apply {
+                                        putString("userAvatar",userAvatar)
+                                    }
+                                    val msg = Message().apply {
+                                        what = LOGIN_SUCCESSFUL
+                                        this.data = bundleData
+                                    }
+                                    handler.sendMessage(msg)
 //                                Log.e(
 //                                    "TAG",
 //                                    "onResponse: -------------${data.getString("userAvatar")}------------",
@@ -125,7 +134,14 @@ class LoginRegister : AppCompatActivity() {
 //                                    "TAG",
 //                                    "onResponse: -------------${data.getString("userAvatar")}------------",
 //                                )
+                                }
+                                403 -> {
+                                    runOnUiThread {
+                                        Toast.makeText(this@Login,"用户名与密码不符",Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             }
+
                         }
                     }
                 })

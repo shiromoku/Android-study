@@ -12,9 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AllInOne"
         android:usesCleartextTraffic="true">
-        <activity android:name=".LoginRegister"></activity>
+        <activity android:name=".Register"/>
+        <activity android:name=".Login" />
         <activity android:name=".UserInfo" />
         <activity android:name=".Web" />
+        <activity android:name=".HomeActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

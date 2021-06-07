@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
-    tools:context=".LoginRegister">
+    tools:context=".Login">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_user_name"
@@ -53,6 +53,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="登录"
+        />
+
+    <TextView
+        android:layout_below="@id/btn_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"
+        android:text="忘记密码?"
+        />
+    <TextView
+        android:id="@+id/tv_register"
+        android:layout_below="@id/btn_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="注册新账号"
         />
 
 </RelativeLayout>
