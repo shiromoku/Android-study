@@ -1,19 +1,15 @@
 package com.example.allinone
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
-import android.widget.*
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
+import android.widget.AdapterView
+import android.widget.ImageView
+import android.widget.ListView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.bumptech.glide.request.RequestOptions
 import com.example.allinone.adapter.MainAdapter
 import com.example.allinone.entity.Page
 import okhttp3.*
@@ -21,83 +17,99 @@ import org.json.JSONArray
 import java.io.IOException
 import java.lang.Exception
 
-class MainActivity : FragmentActivity()/*, View.OnKeyListener */ {
-    lateinit var frameLayout: FrameLayout
-    lateinit var radioGroup: RadioGroup
-    lateinit var radioButtonHome: RadioButton
-    lateinit var radioButtonMine: RadioButton
-    var fromFragment: Fragment? = null
-    var position = 0
-    val fragmentList = mutableListOf<Fragment>()
+class MainActivity : Activity()/*, View.OnKeyListener */ {
+    val LOAD_DATA_DONE = 0x001
+    val pageList: MutableList<Page> = mutableListOf()
+    lateinit var lvMain: ListView
+    lateinit var ivUserAvatar: ImageView
+    val mainAdapter = MainAdapter(this, pageList)
 
+    lateinit var mainHandler: Handler
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         initPart()
         setListener()
-//        Thread.sleep(5000)
-        radioGroup.check(R.id.rg_main)
+
+        mainHandler = object : Handler(mainLooper) {
+            override fun handleMessage(msg: Message) {
+                when (msg.what) {
+                    LOAD_DATA_DONE -> {
+                        runOnUiThread {
+                            mainAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+        }
+
+        loadData()
+
     }
 
-    private fun initFragmentList() {
-        fragmentList.add(HomeActivity())
-//        fragmentList.add(UserInfo())
+    private fun loadData() {
+        Thread {
+            val url = getString(R.string.baseUrl) + getString(R.string.news)
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .get()
+                .url(url)
+                .build()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call?, e: IOException?) {
+                    e?.printStackTrace()
+                }
+
+                @Throws(IOException::class)
+                override fun onResponse(call: Call?, response: Response) {
+                    if (response.isSuccessful) {
+                        val str = response.body().string()
+
+                        val jsonArray = JSONArray(str)
+                        for (i in 0 until jsonArray.length()) {
+                            val a = jsonArray.getJSONObject(i)
+                            val p = Page(a)
+                            pageList.add(p)
+                        }
+                        runOnUiThread {
+                            mainAdapter.notifyDataSetChanged()
+                        }
+                    } else {
+                        Log.e("TAG", "onResponse: -------------unSuccessful----------------")
+                    }
+                }
+            })
+        }.run()
     }
 
     private fun setListener() {
-        radioGroup.setOnCheckedChangeListener(MainOnCheckedChangeListener())
-    }
-
-    inner class MainOnCheckedChangeListener: RadioGroup.OnCheckedChangeListener {
-        override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
-            when(checkedId){
-                R.id.rb_home -> {
-                    position = 0
-                }
-                R.id.rb_home -> {
-                    position = 1
-                }
-
-                else -> position = 0
+        lvMain.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                val newActivityIntent = Intent(this, Web::class.java)
+                val date = Bundle()
+                date.putString("url", pageList[position].pageUrl)
+                newActivityIntent.putExtras(date)
+                startActivity(newActivityIntent)
             }
-
-            switchFragment(fromFragment,getFragment())
+        ivUserAvatar.setOnClickListener {
+            val newActivityIntent = Intent(this, UserInfo::class.java)
+            startActivity(newActivityIntent)
         }
     }
-
-    private fun switchFragment(from:Fragment?,to:Fragment) {
-        if(to != from){
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            from?.let { fragmentTransaction.hide(it) }
-
-
-            try {
-                if(!to.isAdded){
-                    fragmentTransaction.add(R.id.main_FrameLayout,to)
-                }else{
-                    fragmentTransaction.show(to)
-                }
-            } catch (e: java.lang.IllegalStateException) {
-
-            }
-
-            fromFragment = to
-
-            fragmentTransaction.commit()
-        }
-    }
-
-    private fun getFragment(): Fragment {
-        return fragmentList[position]
-    }
-
 
     private fun initPart() {
-        frameLayout = findViewById(R.id.main_FrameLayout)
-        radioGroup = findViewById(R.id.rg_main)
-        radioButtonHome = findViewById(R.id.rb_home)
-        radioButtonMine = findViewById(R.id.rb_mine)
+        lvMain = findViewById(R.id.lv_main)
+        ivUserAvatar = findViewById(R.id.iv_user_avatar)
 
-        initFragmentList()
+
+        Glide.with(this)
+            .load(R.drawable.user_avatar_full_fill)
+            .into(ivUserAvatar)
+
+
+
+        lvMain.adapter = mainAdapter
+
     }
 }
