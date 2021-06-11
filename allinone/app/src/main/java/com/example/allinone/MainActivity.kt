@@ -1,6 +1,7 @@
 package com.example.allinone
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -103,11 +104,16 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
         ivUserAvatar = findViewById(R.id.iv_user_avatar)
 
 
-        Glide.with(this)
-            .load(R.drawable.user_avatar_full_fill)
-            .into(ivUserAvatar)
-
-
+        val sp = getSharedPreferences("allInOne", Context.MODE_PRIVATE)
+        if (sp.getBoolean("isLogin", false)) {
+            Glide.with(this)
+                .load(sp.getString("userAvatar", ""))
+                .into(ivUserAvatar)
+        } else {
+            Glide.with(this)
+                .load(R.drawable.user_avatar_full_fill)
+                .into(ivUserAvatar)
+        }
 
         lvMain.adapter = mainAdapter
 

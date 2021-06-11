@@ -50,6 +50,7 @@
             android:id="@+id/tiet_confirm_password"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:inputType="textPassword"
             android:background="@android:color/transparent"
             android:hint="确认密码"
 

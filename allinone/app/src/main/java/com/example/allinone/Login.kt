@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import com.example.allinone.tools.EncryptTool
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
@@ -33,6 +34,7 @@ class Login : AppCompatActivity() {
         tietUserName = findViewById(R.id.tiet_user_name)
         tietPassword = findViewById(R.id.tiet_password)
         btnLogin = findViewById(R.id.btn_login)
+        btnLogin.isEnabled = false
 
         handler = object : Handler(mainLooper) {
             override fun handleMessage(msg: Message) {
@@ -64,80 +66,88 @@ class Login : AppCompatActivity() {
     private fun setListener() {
         val tvRegister = findViewById<TextView>(R.id.tv_register)
         tvRegister.setOnClickListener {
-            val intent = Intent(this,Register::class.java)
+            val intent = Intent(this, Register::class.java)
             startActivity(intent)
         }
 
+
         tietUserName.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
+//            if (!hasFocus) {
                 userName = tietUserName.text.toString()
                 if (userName == "") {
                     tietUserName.error = "用户名不能为空"
-//                    btnLogin.isEnabled = false
-                } else btnLogin.isEnabled = true
-            }
+                    btnLogin.isEnabled = false
+                }
+//            }
         }
         tietPassword.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
+//            if (!hasFocus) {
                 password = tietPassword.text.toString()
                 if (password == "") {
                     tietPassword.error = "密码不能为空"
-//                    btnLogin.isEnabled = false
+                    btnLogin.isEnabled = false
                 } else btnLogin.isEnabled = true
+//            }
+        }
+
+        tietUserName.doOnTextChanged { _, _, _, count ->
+            if (count == 0) {
+                tietUserName.error = "用户名不能为空"
+                btnLogin.isEnabled = false
             }
+        }
+
+        tietPassword.doOnTextChanged { _, _, _, count ->
+            if(count == 0){
+                tietPassword.error = "密码不能为空"
+                btnLogin.isEnabled = false
+            } else btnLogin.isEnabled = true
         }
 
         btnLogin.setOnClickListener {
             userName = tietUserName.text.toString()
             password = tietPassword.text.toString()
-            userName = "123456"
-            password = "123456"
+//            userName = "123456"
+//            password = "123456"
             Thread {
                 val url = getString(R.string.baseUrl) + getString(R.string.login)
                 val client = OkHttpClient()
                 val formBody =
-                    FormBody.Builder().add("userName", EncryptTool.md5(userName)).add("password", EncryptTool.md5(password)).build()
+                    FormBody.Builder().add("userName", EncryptTool.md5(userName))
+                        .add("password", EncryptTool.md5(password)).build()
                 val request = Request.Builder()
                     .post(formBody)
                     .url(url)
                     .build()
                 client.newCall(request).enqueue(object : Callback {
-                    override fun onFailure(call: Call?, e: IOException?) {
-//                        TODO("Not yet implemented")
-                        Log.e("TAG", "onFailure: ++++++++++++++++++++++++++++")
-                    }
+                    override fun onFailure(call: Call?, e: IOException?) {}
 
                     override fun onResponse(call: Call?, response: Response?) {
-//                        TODO("Not yet implemented")
-
                         val body = response?.body()?.string() ?: ""
-                        Log.e("TAG", "onResponse: ---------------$body----------")
                         if (body != "") {
                             val result = JSONObject(body)
-                            when(result.getInt("resultCode")){
+                            when (result.getInt("resultCode")) {
                                 200 -> {
-                                    val data = JSONObject(result.getJSONArray("data").get(0).toString())
+                                    val data =
+                                        JSONObject(result.getJSONArray("data").get(0).toString())
                                     val userAvatar = data.getString("userAvatar")
                                     val bundleData = Bundle().apply {
-                                        putString("userAvatar",userAvatar)
+                                        putString("userAvatar", userAvatar)
                                     }
                                     val msg = Message().apply {
                                         what = LOGIN_SUCCESSFUL
                                         this.data = bundleData
                                     }
+                                    runOnUiThread {
+                                        Toast.makeText(this@Login, "登陆成功", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
                                     handler.sendMessage(msg)
-//                                Log.e(
-//                                    "TAG",
-//                                    "onResponse: -------------${data.getString("userAvatar")}------------",
-//                                )
-//                                Log.e(
-//                                    "TAG",
-//                                    "onResponse: -------------${data.getString("userAvatar")}------------",
-//                                )
                                 }
                                 403 -> {
                                     runOnUiThread {
-                                        Toast.makeText(this@Login,"用户名与密码不符",Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@Login, "用户名与密码不符", Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                                 }
                             }

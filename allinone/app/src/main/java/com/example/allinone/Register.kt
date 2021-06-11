@@ -6,6 +6,7 @@ import android.os.Message
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import com.example.allinone.tools.EncryptTool
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
@@ -16,14 +17,15 @@ class Register : AppCompatActivity() {
     var userName = ""
     var password = ""
     var confirmPassword = ""
-    lateinit var tietUserName : TextInputEditText
-    lateinit var tietPassword : TextInputEditText
-    lateinit var tietConfirmPassword : TextInputEditText
+    lateinit var tietUserName: TextInputEditText
+    lateinit var tietPassword: TextInputEditText
+    lateinit var tietConfirmPassword: TextInputEditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity__register)
 
         val btnRegister = findViewById<Button>(R.id.btn_register)
+        btnRegister.isEnabled = false
 
         tietUserName = findViewById(R.id.tiet_user_name)
         tietPassword = findViewById(R.id.tiet_password)
@@ -31,44 +33,69 @@ class Register : AppCompatActivity() {
 
 
         tietUserName.setOnFocusChangeListener { _, hasFocus ->
-            if(!hasFocus){
+            if (!hasFocus) {
                 val text = tietUserName.text.toString()
-                if(text == ""){
+                if (text == "") {
                     tietUserName.error = "不能为空"
                     btnRegister.isEnabled = false
-                }else btnRegister.isEnabled = true
+                } else btnRegister.isEnabled = true
             }
         }
         tietPassword.setOnFocusChangeListener { _, hasFocus ->
-            if(!hasFocus){
+//            if (!hasFocus) {
                 val text = tietPassword.text.toString()
                 val confirmPassword = tietConfirmPassword.text.toString()
-                if(text == ""){
+                if (text == "") {
                     tietPassword.error = "不能为空"
                     btnRegister.isEnabled = false
-                }else if(confirmPassword != text){
+                } else if (confirmPassword != text) {
                     tietConfirmPassword.error = "确认密码与密码不相同"
                     btnRegister.isEnabled = false
-                }else
-                {
+                } else {
                     btnRegister.isEnabled = true
                 }
-            }
+//            }
         }
         tietConfirmPassword.setOnFocusChangeListener { _, hasFocus ->
-            if(!hasFocus){
+//            if (!hasFocus) {
                 val text = tietPassword.text.toString()
                 val confirmPassword = tietConfirmPassword.text.toString()
-                if(text == ""){
+                if (text == "") {
                     tietConfirmPassword.error = "不能为空"
                     btnRegister.isEnabled = false
-                }else if(confirmPassword != text){
+                } else if (confirmPassword != text) {
                     tietConfirmPassword.error = "确认密码与密码不相同"
                     btnRegister.isEnabled = false
-                }else
-                {
+                } else {
                     btnRegister.isEnabled = true
                 }
+//            }
+        }
+
+        tietPassword.doOnTextChanged { _, _, _, count ->
+            val text = tietPassword.text.toString()
+            val confirmPassword = tietConfirmPassword.text.toString()
+            if(count == 0){
+                tietPassword.error = "不能为空"
+                btnRegister.isEnabled = false
+            }else if (confirmPassword != text) {
+                tietConfirmPassword.error = "确认密码与密码不相同"
+                btnRegister.isEnabled = false
+            } else {
+                btnRegister.isEnabled = true
+            }
+        }
+        tietConfirmPassword.doOnTextChanged { _, _, _, count ->
+            val text = tietPassword.text.toString()
+            val confirmPassword = tietConfirmPassword.text.toString()
+            if(count == 0){
+                tietConfirmPassword.error = "不能为空"
+                btnRegister.isEnabled = false
+            }else if (confirmPassword != text) {
+                tietConfirmPassword.error = "确认密码与密码不相同"
+                btnRegister.isEnabled = false
+            } else {
+                btnRegister.isEnabled = true
             }
         }
 
@@ -76,8 +103,8 @@ class Register : AppCompatActivity() {
             userName = tietUserName.text.toString()
             password = tietPassword.text.toString()
             confirmPassword = tietConfirmPassword.text.toString()
-            userName = "123456"
-            password = "123456"
+//            userName = "123456"
+//            password = "123456"
             Thread {
                 val url = getString(R.string.baseUrl) + getString(R.string.register)
                 val client = OkHttpClient()
@@ -93,25 +120,25 @@ class Register : AppCompatActivity() {
                     .build()
                 client.newCall(request).enqueue(object : Callback {
                     override fun onFailure(call: Call?, e: IOException?) {
-                        Log.e("TAG", "onFailure: ++++++++++++++++++++++++++++")
                     }
 
                     override fun onResponse(call: Call?, response: Response?) {
 
                         val body = response?.body()?.string() ?: ""
-                        Log.e("TAG", "onResponse: ---------------$body----------")
                         if (body != "") {
                             val result = JSONObject(body)
-                            when(result.getInt("resultCode")){
+                            when (result.getInt("resultCode")) {
                                 200 -> {
-                                runOnUiThread {
-                                    Toast.makeText(this@Register,"注册成功",Toast.LENGTH_SHORT).show()
-                                }
-
+                                    runOnUiThread {
+                                        Toast.makeText(this@Register, "注册成功", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                    finish()
                                 }
                                 450 -> {
                                     runOnUiThread {
-                                        Toast.makeText(this@Register,"用户已存在",Toast.LENGTH_LONG).show()
+                                        Toast.makeText(this@Register, "用户已存在", Toast.LENGTH_LONG)
+                                            .show()
                                     }
                                 }
                             }
