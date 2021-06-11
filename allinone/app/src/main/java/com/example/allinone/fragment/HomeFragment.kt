@@ -48,6 +48,7 @@ class HomeFragment : Fragment() {
         }
         setListener()
         lvMain.adapter = mainAdapter
+        Log.e("TAG", "onCreateView: ----------------------++------------", )
         return view;
     }
 

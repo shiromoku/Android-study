@@ -16,6 +16,7 @@
         <activity android:name=".Login" />
         <activity android:name=".UserInfo" />
         <activity android:name=".Web" />
+        <activity android:name=".LauncherActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
