@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
+import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.ListView
+import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.example.allinone.adapter.MainAdapter
 import com.example.allinone.entity.Page
@@ -60,6 +62,10 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call?, e: IOException?) {
                     e?.printStackTrace()
+                    runOnUiThread {
+                        val tv_connect_fail = findViewById<TextView>(R.id.tv_connect_fail)
+                        tv_connect_fail.visibility = View.VISIBLE
+                    }
                 }
 
                 @Throws(IOException::class)
@@ -74,6 +80,8 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
                             pageList.add(p)
                         }
                         runOnUiThread {
+                            val tv_connect_fail = findViewById<TextView>(R.id.tv_connect_fail)
+                            tv_connect_fail.visibility = View.GONE
                             mainAdapter.notifyDataSetChanged()
                         }
                     } else {
