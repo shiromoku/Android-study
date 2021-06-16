@@ -83,6 +83,7 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
                             val tv_connect_fail = findViewById<TextView>(R.id.tv_connect_fail)
                             tv_connect_fail.visibility = View.GONE
                             mainAdapter.notifyDataSetChanged()
+
                         }
                     } else {
                         Log.e("TAG", "onResponse: -------------unSuccessful----------------")
@@ -103,6 +104,7 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
             }
         ivUserAvatar.setOnClickListener {
             val newActivityIntent = Intent(this, UserInfo::class.java)
+//            startActivityForResult(newActivityIntent,0)
             startActivity(newActivityIntent)
         }
     }
@@ -113,17 +115,33 @@ class MainActivity : Activity()/*, View.OnKeyListener */ {
 
 
         val sp = getSharedPreferences("allInOne", Context.MODE_PRIVATE)
-        if (sp.getBoolean("isLogin", false)) {
-            Glide.with(this)
-                .load(sp.getString("userAvatar", ""))
-                .into(ivUserAvatar)
-        } else {
+//        if (sp.getBoolean("isLogin", false)) {
+//            Glide.with(this)
+//                .load(sp.getString("userAvatar", ""))
+//                .into(ivUserAvatar)
+//        } else {
             Glide.with(this)
                 .load(R.drawable.user_avatar_full_fill)
                 .into(ivUserAvatar)
-        }
+//        }
 
         lvMain.adapter = mainAdapter
 
     }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        if(requestCode == 0){
+//            val sp = getSharedPreferences("allInOne", Context.MODE_PRIVATE)
+//            if (sp.getBoolean("isLogin", false)) {
+//                Glide.with(this)
+//                    .load(sp.getString("userAvatar", ""))
+//                    .into(ivUserAvatar)
+//            } else {
+//                Glide.with(this)
+//                    .load(R.drawable.user_avatar_full_fill)
+//                    .into(ivUserAvatar)
+//            }
+//        }
+//    }
+
 }
